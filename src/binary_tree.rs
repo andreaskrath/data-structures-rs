@@ -18,4 +18,8 @@ impl<T: PartialOrd> BinaryTree<T> {
             height: 0,
         }
     }
+
+    pub fn is_empty(&self) -> bool {
+        self.root.is_none()
+    }
 }

@@ -22,4 +22,10 @@ impl<T: PartialOrd> BinaryTree<T> {
     pub fn is_empty(&self) -> bool {
         self.root.is_none()
     }
+
+    pub fn clear(&mut self) {
+        self.root = None;
+        self.count = 0;
+        self.height = 0;
+    }
 }

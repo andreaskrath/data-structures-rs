@@ -10,3 +10,12 @@ where
     height: usize,
 }
 
+impl<T: PartialOrd> BinaryTree<T> {
+    pub fn new() -> Self {
+        Self {
+            root: None,
+            count: 0,
+            height: 0,
+        }
+    }
+}

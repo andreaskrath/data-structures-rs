@@ -35,4 +35,11 @@ impl<T: PartialOrd> BinaryTree<T> {
         self.height
     }
 
+    /// Returns the value contained within the root element.
+    pub fn root(&self) -> Option<&T> {
+        match self.root.as_deref() {
+            Some(v) => Some(v.value()),
+            None => None,
+        }
+    }
 }

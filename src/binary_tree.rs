@@ -30,4 +30,9 @@ impl<T: PartialOrd> BinaryTree<T> {
         self.count = 0;
         self.height = 0;
     }
+    /// Returns the height of the binary tree.
+    pub fn height(&self) -> usize {
+        self.height
+    }
+
 }

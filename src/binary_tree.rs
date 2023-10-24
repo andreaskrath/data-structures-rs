@@ -42,4 +42,9 @@ impl<T: PartialOrd> BinaryTree<T> {
             None => None,
         }
     }
+
+    /// Returns the number of elements in the binary tree.
+    pub fn count(&self) -> usize {
+        self.count
+    }
 }

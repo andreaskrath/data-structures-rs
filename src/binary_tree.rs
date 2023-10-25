@@ -1,5 +1,3 @@
-use crate::shared::Item;
-
 #[derive(Default, Debug, Clone)]
 pub struct BinaryTree<T>
 where
@@ -57,5 +55,55 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// Returns the number of elements in the binary tree.
     pub fn count(&self) -> usize {
         self.count
+    }
+}
+
+#[derive(Debug, Default, Clone, PartialEq)]
+pub struct Item<T> {
+    value: T,
+    left: Option<Box<Item<T>>>,
+    right: Option<Box<Item<T>>>,
+}
+
+impl<T: PartialOrd> Item<T> {
+    pub fn new(value: T) -> Self {
+        Self {
+            value,
+            left: None,
+            right: None,
+        }
+    }
+
+    /// Returns a reference to the value of the item.
+    pub fn value(&self) -> &T {
+        &self.value
+    }
+
+    /// Returns an `Option` containing a reference to the left child of the item.
+    pub fn left(&self) -> Option<&Self> {
+        self.left.as_deref()
+    }
+
+    /// Returns an `Option` containing a reference to the right child of the item.
+    pub fn right(&self) -> Option<&Self> {
+        self.right.as_deref()
+    }
+
+    /// Returns an `Option` containing a mutable reference to the left child of the item.
+    pub fn left_mut(&mut self) -> Option<&mut Self> {
+        self.left.as_deref_mut()
+    }
+
+    /// Returns an `Option` containing a mutable reference to the right child of the item.
+    pub fn right_mut(&mut self) -> Option<&mut Self> {
+        self.right.as_deref_mut()
+    }
+
+    pub fn set_left(&mut self, new_left: Item<T>) {
+        self.left = Some(Box::new(new_left))
+    }
+
+    pub fn set_right(&mut self, new_right: Item<T>) {
+        self.right = Some(Box::new(new_right))
     }
 }

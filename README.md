@@ -10,3 +10,6 @@ Merges to main should only happen once all actions are completed and the issue i
 
 # Safety
 The entirety of the crate is written in safe rust, enforced with `#![forbid(unsafe_code)]`.
+
+# Convention
+The product should be developed with the [API guidelines](https://rust-lang.github.io/api-guidelines/about.html) in mind.

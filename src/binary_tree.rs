@@ -11,6 +11,17 @@ where
 }
 
 impl<T: PartialOrd> BinaryTree<T> {
+    /// Constructs a new empty `BinaryTree<T>`.
+    ///
+    /// # Examples
+    ///
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// # #[allow(unused_mut)]
+    /// let mut tree: BinaryTree<i32> = BinaryTree::new();
+    /// ```
+    #[inline]
+    #[must_use]
     pub fn new() -> Self {
         Self {
             root: None,

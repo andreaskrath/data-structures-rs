@@ -1,4 +1,4 @@
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, PartialEq)]
 pub struct BinaryTree<T>
 where
     T: PartialOrd,
@@ -25,6 +25,49 @@ impl<T: PartialOrd> BinaryTree<T> {
             root: None,
             count: 0,
             height: 0,
+        }
+    }
+
+    pub fn insert(&mut self, value: T) {
+        use std::cmp::Ordering as Ord;
+
+        match self.root.as_deref_mut() {
+            Some(mut root) => {
+                // An empty tree is height 0, while a tree with only a root is height 1
+                // meaning this arm, which is entered when root is not empty
+                // automatically starts at level 2 in terms of height.
+                let mut level: usize = 2;
+                loop {
+                    match (root.left(), root.right()) {
+                        (None, None) => {
+                            match value.partial_cmp(root.value()).unwrap() {
+                                Ord::Equal => return,
+                                Ord::Less => {
+                                    let node = Item::new(value);
+                                    root.set_left(node);
+                                }
+                                Ord::Greater => {
+                                    let node = Item::new(value);
+                                    root.set_right(node);
+                                }
+                            }
+                            self.height = level;
+                            self.count += 1;
+                            return;
+                        }
+                        (None, Some(r)) => todo!(),
+                        (Some(l), None) => todo!(),
+                        (Some(l), Some(r)) => todo!(),
+                    }
+
+                    level += 1;
+                }
+            }
+            None => {
+                self.root = Some(Box::new(Item::new(value)));
+                self.count = 1;
+                self.height = 1;
+            }
         }
     }
 
@@ -105,5 +148,64 @@ impl<T: PartialOrd> Item<T> {
 
     pub fn set_right(&mut self, new_right: Item<T>) {
         self.right = Some(Box::new(new_right))
+    }
+}
+
+#[cfg(test)]
+mod binary_tree_insert {
+    use super::{BinaryTree, Item};
+
+    #[test]
+    fn one_element_into_empty_tree_should_occupy_root() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item::new(5))),
+            count: 1,
+            height: 1,
+        };
+        tree.insert(5);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn two_elements_into_empty_tree_second_element_should_be_left() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: Some(Box::new(Item {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: None,
+            })),
+            count: 2,
+            height: 2,
+        };
+        tree.insert(5);
+        tree.insert(4);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn two_elements_into_empty_tree_second_element_should_be_right() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: Some(Box::new(Item {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 2,
+            height: 2,
+        };
+        tree.insert(5);
+        tree.insert(6);
+        assert_eq!(tree, expected);
     }
 }

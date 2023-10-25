@@ -4,6 +4,7 @@ Branches should be named so that they can lead back to the issue they relate to,
 This is done by using the following template `<issue-type>/<issue-number>`, for example:
 - `feature/225`
 - `bug/102`
+- `documentation/155`
 
 ## Merging
 Merges to main should only happen once all actions are completed and the issue is solved in its entirety.

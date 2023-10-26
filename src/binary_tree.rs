@@ -168,6 +168,16 @@ impl<T: PartialOrd> BinaryTree<T> {
     }
 
     /// Returns the value contained within the root element.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let mut tree = BinaryTree::new();
+    /// assert_eq!(tree.root(), None);
+    ///
+    /// tree.insert(5);
+    /// assert_eq!(tree.root(), Some(&5));
+    /// ```
     pub fn root(&self) -> Option<&T> {
         match self.root.as_deref() {
             Some(v) => Some(v.value()),

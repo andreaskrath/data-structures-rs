@@ -257,6 +257,7 @@ impl<T: PartialOrd> Item<T> {
         self.left = Some(Box::new(Item::new(value)))
     }
 
+    /// Crates a new `Item` from the provided value, and set it as the right child of `self`.
     pub fn set_right(&mut self, value: T) {
         self.right = Some(Box::new(Item::new(value)))
     }

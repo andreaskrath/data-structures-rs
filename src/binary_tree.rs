@@ -159,7 +159,11 @@ mod binary_tree_insert {
     fn one_element_into_empty_tree_should_occupy_root() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item::new(5))),
+            root: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
             count: 1,
             height: 1,
         };

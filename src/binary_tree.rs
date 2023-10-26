@@ -142,12 +142,12 @@ impl<T: PartialOrd> Item<T> {
         self.right.as_deref_mut()
     }
 
-    pub fn set_left(&mut self, new_left: Item<T>) {
-        self.left = Some(Box::new(new_left))
+    pub fn set_left(&mut self, value: T) {
+        self.left = Some(Box::new(Item::new(value)))
     }
 
-    pub fn set_right(&mut self, new_right: Item<T>) {
-        self.right = Some(Box::new(new_right))
+    pub fn set_right(&mut self, value: T) {
+        self.right = Some(Box::new(Item::new(value)))
     }
 }
 

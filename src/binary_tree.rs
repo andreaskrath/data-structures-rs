@@ -308,6 +308,38 @@ mod item {
 
         assert_eq!(item.left(), expected);
     }
+
+    #[test]
+    fn gets_right_child_that_is_none() {
+        let item = Item {
+            value: 0,
+            left: None,
+            right: None,
+        };
+        let expected = None;
+
+        assert_eq!(item.right(), expected);
+    }
+
+    #[test]
+    fn gets_right_child_that_is_some() {
+        let item = Item {
+            value: 0,
+            left: None,
+            right: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+        };
+        let expected = Some(&Item {
+            value: 5,
+            left: None,
+            right: None,
+        });
+
+        assert_eq!(item.right(), expected);
+    }
 }
 
 #[cfg(test)]

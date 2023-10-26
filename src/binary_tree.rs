@@ -264,6 +264,21 @@ impl<T: PartialOrd> Item<T> {
 }
 
 #[cfg(test)]
+mod item {
+    use super::Item;
+
+    #[test]
+    fn gets_the_value() {
+        let item = Item {
+            value: 5,
+            left: None,
+            right: None,
+        };
+        assert_eq!(item.value(), &5);
+    }
+}
+
+#[cfg(test)]
 mod binary_tree_getters {
     use super::{BinaryTree, Item};
 

@@ -28,6 +28,19 @@ impl<T: PartialOrd> BinaryTree<T> {
         }
     }
 
+    /// Inserts the provided value into the `BinaryTree`,
+    /// and preserves the properties of the binary tree.
+    ///
+    /// # Panic
+    /// The function will panic if a comparison is impossible with the [`PartialOrd`] trait.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let mut tree = BinaryTree::new();
+    /// tree.insert(5);
+    /// assert_eq!(tree.root(), Some(&5));
+    /// ```
     pub fn insert(&mut self, value: T) {
         use std::cmp::Ordering as Ord;
 

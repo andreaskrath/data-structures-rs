@@ -229,4 +229,277 @@ mod binary_tree_insert {
         tree.insert(6);
         assert_eq!(tree, expected);
     }
+
+    #[test]
+    fn discards_duplicate_inserts_of_root() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+            count: 1,
+            height: 1,
+        };
+        tree.insert(5);
+        tree.insert(5);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn inserts_three_elements_second_and_third_are_right_children() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 1,
+                left: None,
+                right: Some(Box::new(Item {
+                    value: 2,
+                    left: None,
+                    right: Some(Box::new(Item {
+                        value: 3,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+            })),
+            count: 3,
+            height: 3,
+        };
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn discards_duplicates_of_right_children() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 1,
+                left: None,
+                right: Some(Box::new(Item {
+                    value: 2,
+                    left: None,
+                    right: Some(Box::new(Item {
+                        value: 3,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+            })),
+            count: 3,
+            height: 3,
+        };
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn inserts_three_elements_second_and_third_are_left_children() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 3,
+                left: Some(Box::new(Item {
+                    value: 2,
+                    left: Some(Box::new(Item {
+                        value: 1,
+                        left: None,
+                        right: None,
+                    })),
+                    right: None,
+                })),
+                right: None,
+            })),
+            count: 3,
+            height: 3,
+        };
+        tree.insert(3);
+        tree.insert(2);
+        tree.insert(1);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn discards_duplicates_of_left_children() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 3,
+                left: Some(Box::new(Item {
+                    value: 2,
+                    left: Some(Box::new(Item {
+                        value: 1,
+                        left: None,
+                        right: None,
+                    })),
+                    right: None,
+                })),
+                right: None,
+            })),
+            count: 3,
+            height: 3,
+        };
+        tree.insert(3);
+        tree.insert(2);
+        tree.insert(1);
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn inserts_four_elements_zig_zag_starting_left() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 10,
+                left: Some(Box::new(Item {
+                    value: 0,
+                    left: None,
+                    right: Some(Box::new(Item {
+                        value: 5,
+                        left: Some(Box::new(Item {
+                            value: 3,
+                            left: None,
+                            right: None,
+                        })),
+                        right: None,
+                    })),
+                })),
+                right: None,
+            })),
+            count: 4,
+            height: 4,
+        };
+        tree.insert(10);
+        tree.insert(0);
+        tree.insert(5);
+        tree.insert(3);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn inserts_four_elements_zig_zag_starting_right() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 0,
+                left: None,
+                right: Some(Box::new(Item {
+                    value: 10,
+                    left: Some(Box::new(Item {
+                        value: 3,
+                        left: None,
+                        right: Some(Box::new(Item {
+                            value: 5,
+                            left: None,
+                            right: None,
+                        })),
+                    })),
+                    right: None,
+                })),
+            })),
+            count: 4,
+            height: 4,
+        };
+        tree.insert(0);
+        tree.insert(10);
+        tree.insert(3);
+        tree.insert(5);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn creates_tree_with_root_and_two_direct_children() {
+        let mut tree1 = BinaryTree::new();
+        let mut tree2 = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 2,
+                left: Some(Box::new(Item {
+                    value: 1,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Item {
+                    value: 3,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
+
+        // Creating left child first.
+        tree1.insert(2);
+        tree1.insert(1);
+        tree1.insert(3);
+
+        // Creating right child first.
+        tree2.insert(2);
+        tree2.insert(3);
+        tree2.insert(1);
+
+        assert_eq!(tree1, expected);
+        assert_eq!(tree2, expected);
+    }
+
+    #[test]
+    fn creates_three_layer_tree_one_layer_at_a_time() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 50,
+                left: Some(Box::new(Item {
+                    value: 25,
+                    left: Some(Box::new(Item {
+                        value: 13,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Item {
+                        value: 37,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+                right: Some(Box::new(Item {
+                    value: 75,
+                    left: Some(Box::new(Item {
+                        value: 63,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Item {
+                        value: 87,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+            })),
+            count: 7,
+            height: 3,
+        };
+
+        tree.insert(50);
+        tree.insert(25);
+        tree.insert(75);
+        tree.insert(13);
+        tree.insert(37);
+        tree.insert(63);
+        tree.insert(87);
+
+        assert_eq!(tree, expected);
+    }
 }

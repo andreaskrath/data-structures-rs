@@ -119,7 +119,7 @@ impl<T: PartialOrd> BinaryTree<T> {
 }
 
 #[derive(Debug, Default, Clone, PartialEq)]
-pub struct Item<T> {
+struct Item<T> {
     value: T,
     left: Option<Box<Item<T>>>,
     right: Option<Box<Item<T>>>,

@@ -40,6 +40,8 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// let mut tree = BinaryTree::new();
     /// tree.insert(5);
     /// assert_eq!(tree.root(), Some(&5));
+    /// assert_eq!(tree.height(), 1);
+    /// assert_eq!(tree.count(), 1);
     /// ```
     pub fn insert(&mut self, value: T) {
         use std::cmp::Ordering as Ord;

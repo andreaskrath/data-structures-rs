@@ -425,6 +425,27 @@ mod item {
         item.set_left(-1);
         assert_eq!(item, expected);
     }
+
+    #[test]
+    fn sets_right() {
+        let mut item = Item {
+            value: 0,
+            left: None,
+            right: None,
+        };
+        let expected = Item {
+            value: 0,
+            left: None,
+            right: Some(Box::new(Item {
+                value: 1,
+                left: None,
+                right: None,
+            })),
+        };
+
+        item.set_right(1);
+        assert_eq!(item, expected);
+    }
 }
 
 #[cfg(test)]

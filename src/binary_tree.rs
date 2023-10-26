@@ -216,6 +216,9 @@ struct Item<T> {
 }
 
 impl<T: PartialOrd> Item<T> {
+    /// Constructs a new empty `Item<T>`.
+    ///
+    /// An item has no left or right child.
     pub fn new(value: T) -> Self {
         Self {
             value,

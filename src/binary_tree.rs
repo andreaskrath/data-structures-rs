@@ -1,6 +1,4 @@
-use crate::shared::Item;
-
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, PartialEq)]
 pub struct BinaryTree<T>
 where
     T: PartialOrd,
@@ -30,6 +28,81 @@ impl<T: PartialOrd> BinaryTree<T> {
         }
     }
 
+    /// Inserts the provided value into the `BinaryTree`,
+    /// and preserves the properties of the binary tree.
+    ///
+    /// # Panic
+    /// The function will panic if a comparison is impossible with the [`PartialOrd`] trait.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let mut tree = BinaryTree::new();
+    /// tree.insert(5);
+    /// assert_eq!(tree.root(), Some(&5));
+    /// ```
+    pub fn insert(&mut self, value: T) {
+        use std::cmp::Ordering as Ord;
+
+        match self.root.as_deref_mut() {
+            Some(mut root) => {
+                // An empty tree is height 0, while a tree with only a root is height 1
+                // meaning this arm, which is entered when root is not empty
+                // automatically starts at level 2 in terms of height.
+                let mut level: usize = 2;
+                loop {
+                    match (root.left(), root.right()) {
+                        (None, None) => {
+                            match value.partial_cmp(root.value()).unwrap() {
+                                Ord::Equal => return,
+                                Ord::Less => root.set_left(value),
+                                Ord::Greater => root.set_right(value),
+                            }
+                            self.height = level;
+                            self.count += 1;
+                            return;
+                        }
+                        (None, Some(_)) => match value.partial_cmp(root.value()).unwrap() {
+                            Ord::Equal => return,
+                            Ord::Less => {
+                                root.set_left(value);
+                                self.height = level;
+                                self.count += 1;
+                                return;
+                            }
+                            Ord::Greater => root = root.right_mut().unwrap(),
+                        },
+                        (Some(_), None) => match value.partial_cmp(root.value()).unwrap() {
+                            Ord::Equal => return,
+                            Ord::Less => root = root.left_mut().unwrap(),
+                            Ord::Greater => {
+                                root.set_right(value);
+                                self.height = level;
+                                self.count += 1;
+                                return;
+                            }
+                        },
+                        (Some(_), Some(_)) => match value.partial_cmp(root.value()).unwrap() {
+                            Ord::Equal => return,
+                            Ord::Less => root = root.left_mut().unwrap(),
+                            Ord::Greater => root = root.right_mut().unwrap(),
+                        },
+                    }
+
+                    level += 1;
+                }
+            }
+            None => {
+                // This ensures that root is not an imcomparable value.
+                _ = value.partial_cmp(&value).unwrap();
+
+                self.root = Some(Box::new(Item::new(value)));
+                self.count = 1;
+                self.height = 1;
+            }
+        }
+    }
+
     /// Returns `true` if the binary tree contains no elements.
     pub fn is_empty(&self) -> bool {
         self.root.is_none()
@@ -41,6 +114,7 @@ impl<T: PartialOrd> BinaryTree<T> {
         self.count = 0;
         self.height = 0;
     }
+
     /// Returns the height of the binary tree.
     pub fn height(&self) -> usize {
         self.height
@@ -57,5 +131,499 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// Returns the number of elements in the binary tree.
     pub fn count(&self) -> usize {
         self.count
+    }
+}
+
+#[derive(Debug, Default, Clone, PartialEq)]
+struct Item<T> {
+    value: T,
+    left: Option<Box<Item<T>>>,
+    right: Option<Box<Item<T>>>,
+}
+
+impl<T: PartialOrd> Item<T> {
+    pub fn new(value: T) -> Self {
+        Self {
+            value,
+            left: None,
+            right: None,
+        }
+    }
+
+    /// Returns a reference to the value of the item.
+    pub fn value(&self) -> &T {
+        &self.value
+    }
+
+    /// Returns an `Option` containing a reference to the left child of the item.
+    pub fn left(&self) -> Option<&Self> {
+        self.left.as_deref()
+    }
+
+    /// Returns an `Option` containing a reference to the right child of the item.
+    pub fn right(&self) -> Option<&Self> {
+        self.right.as_deref()
+    }
+
+    /// Returns an `Option` containing a mutable reference to the left child of the item.
+    pub fn left_mut(&mut self) -> Option<&mut Self> {
+        self.left.as_deref_mut()
+    }
+
+    /// Returns an `Option` containing a mutable reference to the right child of the item.
+    pub fn right_mut(&mut self) -> Option<&mut Self> {
+        self.right.as_deref_mut()
+    }
+
+    pub fn set_left(&mut self, value: T) {
+        self.left = Some(Box::new(Item::new(value)))
+    }
+
+    pub fn set_right(&mut self, value: T) {
+        self.right = Some(Box::new(Item::new(value)))
+    }
+}
+
+#[cfg(test)]
+mod binary_tree_getters {
+    use super::{BinaryTree, Item};
+
+    #[test]
+    fn count() {
+        let tree: BinaryTree<()> = BinaryTree {
+            root: None,
+            count: 5,
+            height: 0,
+        };
+        let expected = 5;
+        assert_eq!(tree.count(), expected);
+    }
+
+    #[test]
+    fn height() {
+        let tree: BinaryTree<()> = BinaryTree {
+            root: None,
+            count: 0,
+            height: 3,
+        };
+        let expected = 3;
+        assert_eq!(tree.height(), expected);
+    }
+
+    #[test]
+    fn is_empty() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+            count: 1,
+            height: 1,
+        };
+        let empty_tree: BinaryTree<()> = BinaryTree {
+            root: None,
+            count: 0,
+            height: 0,
+        };
+
+        assert!(!tree.is_empty());
+        assert!(empty_tree.is_empty());
+    }
+
+    #[test]
+    fn clear() {
+        let mut tree = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+            count: 1,
+            height: 1,
+        };
+        let expected: BinaryTree<i32> = BinaryTree {
+            root: None,
+            count: 0,
+            height: 0,
+        };
+
+        assert_ne!(tree, expected);
+
+        tree.clear();
+
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn root() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+            count: 1,
+            height: 1,
+        };
+        let empty_tree: BinaryTree<()> = BinaryTree {
+            root: None,
+            count: 0,
+            height: 0,
+        };
+
+        assert_eq!(tree.root(), Some(&5));
+        assert_eq!(empty_tree.root(), None);
+    }
+}
+
+#[cfg(test)]
+mod binary_tree_insert {
+    use super::{BinaryTree, Item};
+
+    #[test]
+    fn insert_one_element_that_becomes_root() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+            count: 1,
+            height: 1,
+        };
+        tree.insert(5);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn inserts_two_elements_second_is_left_child() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: Some(Box::new(Item {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: None,
+            })),
+            count: 2,
+            height: 2,
+        };
+        tree.insert(5);
+        tree.insert(4);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn inserts_two_elements_second_is_right_child() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: Some(Box::new(Item {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 2,
+            height: 2,
+        };
+        tree.insert(5);
+        tree.insert(6);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn discards_duplicate_inserts_of_root() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+            count: 1,
+            height: 1,
+        };
+        tree.insert(5);
+        tree.insert(5);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn inserts_three_elements_second_and_third_are_right_children() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 1,
+                left: None,
+                right: Some(Box::new(Item {
+                    value: 2,
+                    left: None,
+                    right: Some(Box::new(Item {
+                        value: 3,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+            })),
+            count: 3,
+            height: 3,
+        };
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn discards_duplicates_of_right_children() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 1,
+                left: None,
+                right: Some(Box::new(Item {
+                    value: 2,
+                    left: None,
+                    right: Some(Box::new(Item {
+                        value: 3,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+            })),
+            count: 3,
+            height: 3,
+        };
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn inserts_three_elements_second_and_third_are_left_children() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 3,
+                left: Some(Box::new(Item {
+                    value: 2,
+                    left: Some(Box::new(Item {
+                        value: 1,
+                        left: None,
+                        right: None,
+                    })),
+                    right: None,
+                })),
+                right: None,
+            })),
+            count: 3,
+            height: 3,
+        };
+        tree.insert(3);
+        tree.insert(2);
+        tree.insert(1);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn discards_duplicates_of_left_children() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 3,
+                left: Some(Box::new(Item {
+                    value: 2,
+                    left: Some(Box::new(Item {
+                        value: 1,
+                        left: None,
+                        right: None,
+                    })),
+                    right: None,
+                })),
+                right: None,
+            })),
+            count: 3,
+            height: 3,
+        };
+        tree.insert(3);
+        tree.insert(2);
+        tree.insert(1);
+        tree.insert(1);
+        tree.insert(2);
+        tree.insert(3);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn inserts_four_elements_zig_zag_starting_left() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 10,
+                left: Some(Box::new(Item {
+                    value: 0,
+                    left: None,
+                    right: Some(Box::new(Item {
+                        value: 5,
+                        left: Some(Box::new(Item {
+                            value: 3,
+                            left: None,
+                            right: None,
+                        })),
+                        right: None,
+                    })),
+                })),
+                right: None,
+            })),
+            count: 4,
+            height: 4,
+        };
+        tree.insert(10);
+        tree.insert(0);
+        tree.insert(5);
+        tree.insert(3);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn inserts_four_elements_zig_zag_starting_right() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 0,
+                left: None,
+                right: Some(Box::new(Item {
+                    value: 10,
+                    left: Some(Box::new(Item {
+                        value: 3,
+                        left: None,
+                        right: Some(Box::new(Item {
+                            value: 5,
+                            left: None,
+                            right: None,
+                        })),
+                    })),
+                    right: None,
+                })),
+            })),
+            count: 4,
+            height: 4,
+        };
+        tree.insert(0);
+        tree.insert(10);
+        tree.insert(3);
+        tree.insert(5);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn creates_tree_with_root_and_two_direct_children() {
+        let mut tree1 = BinaryTree::new();
+        let mut tree2 = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 2,
+                left: Some(Box::new(Item {
+                    value: 1,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Item {
+                    value: 3,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
+
+        // Creating left child first.
+        tree1.insert(2);
+        tree1.insert(1);
+        tree1.insert(3);
+
+        // Creating right child first.
+        tree2.insert(2);
+        tree2.insert(3);
+        tree2.insert(1);
+
+        assert_eq!(tree1, expected);
+        assert_eq!(tree2, expected);
+    }
+
+    #[test]
+    fn creates_three_layer_tree_one_layer_at_a_time() {
+        let mut tree = BinaryTree::new();
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 50,
+                left: Some(Box::new(Item {
+                    value: 25,
+                    left: Some(Box::new(Item {
+                        value: 13,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Item {
+                        value: 37,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+                right: Some(Box::new(Item {
+                    value: 75,
+                    left: Some(Box::new(Item {
+                        value: 63,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Item {
+                        value: 87,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+            })),
+            count: 7,
+            height: 3,
+        };
+
+        tree.insert(50);
+        tree.insert(25);
+        tree.insert(75);
+        tree.insert(13);
+        tree.insert(37);
+        tree.insert(63);
+        tree.insert(87);
+
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    #[should_panic]
+    fn incomparable_elements_in_empty_tree_panics() {
+        let mut tree = BinaryTree::new();
+        tree.insert(f64::NAN);
+    }
+
+    #[test]
+    #[should_panic]
+    fn incomparable_elements_in_non_empty_tree_panics() {
+        let mut tree = BinaryTree::new();
+        tree.insert(2.0);
+        tree.insert(f64::NAN);
     }
 }

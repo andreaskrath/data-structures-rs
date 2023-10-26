@@ -252,6 +252,7 @@ impl<T: PartialOrd> Item<T> {
         self.right.as_deref_mut()
     }
 
+    /// Creates a new `Item` from the provided value, and set it as the left child of `self`.
     pub fn set_left(&mut self, value: T) {
         self.left = Some(Box::new(Item::new(value)))
     }

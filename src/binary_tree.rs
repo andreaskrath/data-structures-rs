@@ -80,6 +80,9 @@ impl<T: PartialOrd> BinaryTree<T> {
                 }
             }
             None => {
+                // This ensures that root is not an imcomparable value.
+                _ = value.partial_cmp(&value).unwrap();
+
                 self.root = Some(Box::new(Item::new(value)));
                 self.count = 1;
                 self.height = 1;
@@ -501,5 +504,20 @@ mod binary_tree_insert {
         tree.insert(87);
 
         assert_eq!(tree, expected);
+    }
+
+    #[test]
+    #[should_panic]
+    fn incomparable_elements_in_empty_tree_panics() {
+        let mut tree = BinaryTree::new();
+        tree.insert(f64::NAN);
+    }
+
+    #[test]
+    #[should_panic]
+    fn incomparable_elements_in_non_empty_tree_panics() {
+        let mut tree = BinaryTree::new();
+        tree.insert(2.0);
+        tree.insert(f64::NAN);
     }
 }

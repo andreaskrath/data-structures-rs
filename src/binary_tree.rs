@@ -40,6 +40,8 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// let mut tree = BinaryTree::new();
     /// tree.insert(5);
     /// assert_eq!(tree.root(), Some(&5));
+    /// assert_eq!(tree.height(), 1);
+    /// assert_eq!(tree.count(), 1);
     /// ```
     pub fn insert(&mut self, value: T) {
         use std::cmp::Ordering as Ord;
@@ -104,11 +106,34 @@ impl<T: PartialOrd> BinaryTree<T> {
     }
 
     /// Returns `true` if the binary tree contains no elements.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let mut tree = BinaryTree::new();
+    /// assert!(tree.is_empty());
+    ///
+    /// tree.insert(0);
+    /// assert!(!tree.is_empty());
+    /// ```
     pub fn is_empty(&self) -> bool {
         self.root.is_none()
     }
 
     /// Clears the binary tree of all elements.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let mut tree = BinaryTree::new();
+    /// assert!(tree.is_empty());
+    ///
+    /// tree.insert(0);
+    /// assert!(!tree.is_empty());
+    ///
+    /// tree.clear();
+    /// assert!(tree.is_empty());
+    /// ```
     pub fn clear(&mut self) {
         self.root = None;
         self.count = 0;
@@ -116,11 +141,43 @@ impl<T: PartialOrd> BinaryTree<T> {
     }
 
     /// Returns the height of the binary tree.
+    ///
+    /// An empty tree has a height of `0`.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let mut tree = BinaryTree::new();
+    /// assert_eq!(tree.height(), 0);
+    ///
+    /// // inserting a root makes the height 1
+    /// tree.insert(0);
+    /// assert_eq!(tree.height(), 1);
+    ///
+    /// // adding a child to the root increases the height
+    /// tree.insert(-1);
+    /// assert_eq!(tree.height(), 2);
+    ///
+    /// // this operation only adds a child on the same level
+    /// // which does not increase the height
+    /// tree.insert(1);
+    /// assert_eq!(tree.height(), 2);
+    /// ```
     pub fn height(&self) -> usize {
         self.height
     }
 
     /// Returns the value contained within the root element.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let mut tree = BinaryTree::new();
+    /// assert_eq!(tree.root(), None);
+    ///
+    /// tree.insert(5);
+    /// assert_eq!(tree.root(), Some(&5));
+    /// ```
     pub fn root(&self) -> Option<&T> {
         match self.root.as_deref() {
             Some(v) => Some(v.value()),
@@ -129,6 +186,23 @@ impl<T: PartialOrd> BinaryTree<T> {
     }
 
     /// Returns the number of elements in the binary tree.
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let mut tree = BinaryTree::new();
+    /// assert_eq!(tree.count(), 0);
+    /// tree.insert(5);
+    /// assert_eq!(tree.count(), 1);
+    ///
+    /// // duplicates do not enter the tree
+    /// // and therefore do not affect the count
+    /// tree.insert(5);
+    /// assert_eq!(tree.count(), 1);
+    ///
+    /// // but new values will
+    /// tree.insert(6);
+    /// assert_eq!(tree.count(), 2);
+    /// ```
     pub fn count(&self) -> usize {
         self.count
     }

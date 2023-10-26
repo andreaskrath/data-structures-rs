@@ -186,6 +186,23 @@ impl<T: PartialOrd> BinaryTree<T> {
     }
 
     /// Returns the number of elements in the binary tree.
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let mut tree = BinaryTree::new();
+    /// assert_eq!(tree.count(), 0);
+    /// tree.insert(5);
+    /// assert_eq!(tree.count(), 1);
+    ///
+    /// // duplicates do not enter the tree
+    /// // and therefore do not affect the count
+    /// tree.insert(5);
+    /// assert_eq!(tree.count(), 1);
+    ///
+    /// // but new values will
+    /// tree.insert(6);
+    /// assert_eq!(tree.count(), 2);
+    /// ```
     pub fn count(&self) -> usize {
         self.count
     }

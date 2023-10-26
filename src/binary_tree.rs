@@ -216,6 +216,9 @@ struct Item<T> {
 }
 
 impl<T: PartialOrd> Item<T> {
+    /// Constructs a new empty `Item<T>`.
+    ///
+    /// An item has no left or right child.
     pub fn new(value: T) -> Self {
         Self {
             value,
@@ -249,12 +252,199 @@ impl<T: PartialOrd> Item<T> {
         self.right.as_deref_mut()
     }
 
+    /// Creates a new `Item` from the provided value, and set it as the left child of `self`.
     pub fn set_left(&mut self, value: T) {
         self.left = Some(Box::new(Item::new(value)))
     }
 
+    /// Creates a new `Item` from the provided value, and set it as the right child of `self`.
     pub fn set_right(&mut self, value: T) {
         self.right = Some(Box::new(Item::new(value)))
+    }
+}
+
+#[cfg(test)]
+mod item {
+    use super::Item;
+
+    #[test]
+    fn gets_the_value() {
+        let item = Item {
+            value: 5,
+            left: None,
+            right: None,
+        };
+        assert_eq!(item.value(), &5);
+    }
+
+    #[test]
+    fn gets_left_child_that_is_none() {
+        let item = Item {
+            value: 0,
+            left: None,
+            right: None,
+        };
+        let expected = None;
+
+        assert_eq!(item.left(), expected);
+    }
+
+    #[test]
+    fn gets_left_child_that_is_some() {
+        let item = Item {
+            value: 0,
+            left: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+            right: None,
+        };
+        let expected = Some(&Item {
+            value: 5,
+            left: None,
+            right: None,
+        });
+
+        assert_eq!(item.left(), expected);
+    }
+
+    #[test]
+    fn gets_right_child_that_is_none() {
+        let item = Item {
+            value: 0,
+            left: None,
+            right: None,
+        };
+        let expected = None;
+
+        assert_eq!(item.right(), expected);
+    }
+
+    #[test]
+    fn gets_right_child_that_is_some() {
+        let item = Item {
+            value: 0,
+            left: None,
+            right: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+        };
+        let expected = Some(&Item {
+            value: 5,
+            left: None,
+            right: None,
+        });
+
+        assert_eq!(item.right(), expected);
+    }
+
+    #[test]
+    fn gets_mut_left_child_that_is_none() {
+        let mut item = Item {
+            value: 0,
+            left: None,
+            right: None,
+        };
+        let expected = None;
+
+        assert_eq!(item.left_mut(), expected);
+    }
+
+    #[test]
+    fn gets_mut_left_child_that_is_some() {
+        let mut item = Item {
+            value: 0,
+            left: Some(Box::new(Item {
+                value: -1,
+                left: None,
+                right: None,
+            })),
+            right: None,
+        };
+        let mut expected = Item {
+            value: -1,
+            left: None,
+            right: None,
+        };
+
+        assert_eq!(item.left_mut(), Some(&mut expected));
+    }
+
+    #[test]
+    fn gets_mut_right_child_that_is_none() {
+        let mut item = Item {
+            value: 0,
+            left: None,
+            right: None,
+        };
+        let expected = None;
+
+        assert_eq!(item.right_mut(), expected);
+    }
+
+    #[test]
+    fn gets_mut_right_child_that_is_some() {
+        let mut item = Item {
+            value: 0,
+            left: None,
+            right: Some(Box::new(Item {
+                value: 1,
+                left: None,
+                right: None,
+            })),
+        };
+        let mut expected = Item {
+            value: 1,
+            left: None,
+            right: None,
+        };
+
+        assert_eq!(item.right_mut(), Some(&mut expected));
+    }
+
+    #[test]
+    fn sets_left() {
+        let mut item = Item {
+            value: 0,
+            left: None,
+            right: None,
+        };
+        let expected = Item {
+            value: 0,
+            left: Some(Box::new(Item {
+                value: -1,
+                left: None,
+                right: None,
+            })),
+            right: None,
+        };
+
+        item.set_left(-1);
+        assert_eq!(item, expected);
+    }
+
+    #[test]
+    fn sets_right() {
+        let mut item = Item {
+            value: 0,
+            left: None,
+            right: None,
+        };
+        let expected = Item {
+            value: 0,
+            left: None,
+            right: Some(Box::new(Item {
+                value: 1,
+                left: None,
+                right: None,
+            })),
+        };
+
+        item.set_right(1);
+        assert_eq!(item, expected);
     }
 }
 

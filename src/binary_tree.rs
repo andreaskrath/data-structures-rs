@@ -276,6 +276,38 @@ mod item {
         };
         assert_eq!(item.value(), &5);
     }
+
+    #[test]
+    fn gets_left_child_that_is_none() {
+        let item = Item {
+            value: 0,
+            left: None,
+            right: None,
+        };
+        let expected = None;
+
+        assert_eq!(item.left(), expected);
+    }
+
+    #[test]
+    fn gets_left_child_that_is_some() {
+        let item = Item {
+            value: 0,
+            left: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+            right: None,
+        };
+        let expected = Some(&Item {
+            value: 5,
+            left: None,
+            right: None,
+        });
+
+        assert_eq!(item.left(), expected);
+    }
 }
 
 #[cfg(test)]

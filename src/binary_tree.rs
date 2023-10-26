@@ -121,6 +121,19 @@ impl<T: PartialOrd> BinaryTree<T> {
     }
 
     /// Clears the binary tree of all elements.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let mut tree = BinaryTree::new();
+    /// assert!(tree.is_empty());
+    ///
+    /// tree.insert(0);
+    /// assert!(!tree.is_empty());
+    ///
+    /// tree.clear();
+    /// assert!(tree.is_empty());
+    /// ```
     pub fn clear(&mut self) {
         self.root = None;
         self.count = 0;

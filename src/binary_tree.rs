@@ -185,6 +185,99 @@ impl<T: PartialOrd> Item<T> {
 }
 
 #[cfg(test)]
+mod binary_tree_getters {
+    use super::{BinaryTree, Item};
+
+    #[test]
+    fn count() {
+        let tree: BinaryTree<()> = BinaryTree {
+            root: None,
+            count: 5,
+            height: 0,
+        };
+        let expected = 5;
+        assert_eq!(tree.count(), expected);
+    }
+
+    #[test]
+    fn height() {
+        let tree: BinaryTree<()> = BinaryTree {
+            root: None,
+            count: 0,
+            height: 3,
+        };
+        let expected = 3;
+        assert_eq!(tree.height(), expected);
+    }
+
+    #[test]
+    fn is_empty() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+            count: 1,
+            height: 1,
+        };
+        let empty_tree: BinaryTree<()> = BinaryTree {
+            root: None,
+            count: 0,
+            height: 0,
+        };
+
+        assert!(!tree.is_empty());
+        assert!(empty_tree.is_empty());
+    }
+
+    #[test]
+    fn clear() {
+        let mut tree = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+            count: 1,
+            height: 1,
+        };
+        let expected: BinaryTree<i32> = BinaryTree {
+            root: None,
+            count: 0,
+            height: 0,
+        };
+
+        assert_ne!(tree, expected);
+
+        tree.clear();
+
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn root() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+            count: 1,
+            height: 1,
+        };
+        let empty_tree: BinaryTree<()> = BinaryTree {
+            root: None,
+            count: 0,
+            height: 0,
+        };
+
+        assert_eq!(tree.root(), Some(&5));
+        assert_eq!(empty_tree.root(), None);
+    }
+}
+
+#[cfg(test)]
 mod binary_tree_insert {
     use super::{BinaryTree, Item};
 

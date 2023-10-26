@@ -372,6 +372,38 @@ mod item {
 
         assert_eq!(item.left_mut(), Some(&mut expected));
     }
+
+    #[test]
+    fn gets_mut_right_child_that_is_none() {
+        let mut item = Item {
+            value: 0,
+            left: None,
+            right: None,
+        };
+        let expected = None;
+
+        assert_eq!(item.right_mut(), expected);
+    }
+
+    #[test]
+    fn gets_mut_right_child_that_is_some() {
+        let mut item = Item {
+            value: 0,
+            left: None,
+            right: Some(Box::new(Item {
+                value: 1,
+                left: None,
+                right: None,
+            })),
+        };
+        let mut expected = Item {
+            value: 1,
+            left: None,
+            right: None,
+        };
+
+        assert_eq!(item.right_mut(), Some(&mut expected));
+    }
 }
 
 #[cfg(test)]

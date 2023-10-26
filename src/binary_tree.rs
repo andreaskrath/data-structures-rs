@@ -106,6 +106,16 @@ impl<T: PartialOrd> BinaryTree<T> {
     }
 
     /// Returns `true` if the binary tree contains no elements.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let mut tree = BinaryTree::new();
+    /// assert!(tree.is_empty());
+    ///
+    /// tree.insert(0);
+    /// assert!(!tree.is_empty());
+    /// ```
     pub fn is_empty(&self) -> bool {
         self.root.is_none()
     }

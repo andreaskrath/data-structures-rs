@@ -42,22 +42,38 @@ impl<T: PartialOrd> BinaryTree<T> {
                         (None, None) => {
                             match value.partial_cmp(root.value()).unwrap() {
                                 Ord::Equal => return,
-                                Ord::Less => {
-                                    let node = Item::new(value);
-                                    root.set_left(node);
-                                }
-                                Ord::Greater => {
-                                    let node = Item::new(value);
-                                    root.set_right(node);
-                                }
+                                Ord::Less => root.set_left(value),
+                                Ord::Greater => root.set_right(value),
                             }
                             self.height = level;
                             self.count += 1;
                             return;
                         }
-                        (None, Some(r)) => todo!(),
-                        (Some(l), None) => todo!(),
-                        (Some(l), Some(r)) => todo!(),
+                        (None, Some(_)) => match value.partial_cmp(root.value()).unwrap() {
+                            Ord::Equal => return,
+                            Ord::Less => {
+                                root.set_left(value);
+                                self.height = level;
+                                self.count += 1;
+                                return;
+                            }
+                            Ord::Greater => root = root.right_mut().unwrap(),
+                        },
+                        (Some(_), None) => match value.partial_cmp(root.value()).unwrap() {
+                            Ord::Equal => return,
+                            Ord::Less => root = root.left_mut().unwrap(),
+                            Ord::Greater => {
+                                root.set_right(value);
+                                self.height = level;
+                                self.count += 1;
+                                return;
+                            }
+                        },
+                        (Some(_), Some(_)) => match value.partial_cmp(root.value()).unwrap() {
+                            Ord::Equal => return,
+                            Ord::Less => root = root.left_mut().unwrap(),
+                            Ord::Greater => root = root.right_mut().unwrap(),
+                        },
                     }
 
                     level += 1;
@@ -82,6 +98,7 @@ impl<T: PartialOrd> BinaryTree<T> {
         self.count = 0;
         self.height = 0;
     }
+
     /// Returns the height of the binary tree.
     pub fn height(&self) -> usize {
         self.height

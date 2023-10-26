@@ -141,6 +141,28 @@ impl<T: PartialOrd> BinaryTree<T> {
     }
 
     /// Returns the height of the binary tree.
+    ///
+    /// An empty tree has a height of `0`.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let mut tree = BinaryTree::new();
+    /// assert_eq!(tree.height(), 0);
+    ///
+    /// // inserting a root makes the height 1
+    /// tree.insert(0);
+    /// assert_eq!(tree.height(), 1);
+    ///
+    /// // adding a child to the root increases the height
+    /// tree.insert(-1);
+    /// assert_eq!(tree.height(), 2);
+    ///
+    /// // this operation only adds a child on the same level
+    /// // which does not increase the height
+    /// tree.insert(1);
+    /// assert_eq!(tree.height(), 2);
+    /// ```
     pub fn height(&self) -> usize {
         self.height
     }

@@ -156,7 +156,7 @@ mod binary_tree_insert {
     use super::{BinaryTree, Item};
 
     #[test]
-    fn one_element_into_empty_tree_should_occupy_root() {
+    fn insert_one_element_that_becomes_root() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
             root: Some(Box::new(Item {
@@ -172,7 +172,7 @@ mod binary_tree_insert {
     }
 
     #[test]
-    fn two_elements_into_empty_tree_second_element_should_be_left() {
+    fn inserts_two_elements_second_is_left_child() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
             root: Some(Box::new(Item {
@@ -193,7 +193,7 @@ mod binary_tree_insert {
     }
 
     #[test]
-    fn two_elements_into_empty_tree_second_element_should_be_right() {
+    fn inserts_two_elements_second_is_right_child() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
             root: Some(Box::new(Item {

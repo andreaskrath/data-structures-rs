@@ -8,9 +8,26 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v3
+      - name: Install stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+      - name: Run cargo release build
+        uses: actions-rs/cargo@v1
+        with:
+          command: build
+          args: --release --all-features
 
   test:
-    name: Test Suite
+    name: Tests
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -25,6 +42,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
+          args: --all-features
 
   clippy:
     name: Clippy

@@ -32,7 +32,7 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// and preserves the properties of the binary tree.
     ///
     /// # Panic
-    /// The function will panic if a comparison is impossible with the [`PartialOrd`] trait.
+    /// The function will panic if a comparison of elements is impossible with the [`PartialOrd`] trait.
     ///
     /// # Examples
     /// ```

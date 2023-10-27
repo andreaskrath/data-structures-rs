@@ -960,3 +960,49 @@ mod binary_tree_std_trait_impls {
         _ = BinaryTree::from(values);
     }
 }
+
+#[cfg(all(test, feature = "serde"))]
+mod binary_tree_serde {
+    use super::{BinaryTree, Item};
+
+    fn json_tree() -> &'static str {
+        "{\n  \"root\": {\n    \"value\": 5,\n    \"left\": {\n      \"value\": 4,\n      \"left\": null,\n      \"right\": null\n    },\n    \"right\": {\n      \"value\": 6,\n      \"left\": null,\n      \"right\": null\n    }\n  },\n  \"count\": 3,\n  \"height\": 2\n}"
+    }
+
+    #[test]
+    fn deserializes_tree_from_json() {
+        let tree: BinaryTree<i32> =
+            serde_json::from_str(json_tree()).expect("should parse json into tree");
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: Some(Box::new(Item {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Item {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
+
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    fn serialize_tree_into_json() {
+        let mut tree = BinaryTree::new();
+        tree.insert(5);
+        tree.insert(4);
+        tree.insert(6);
+        let expected = json_tree();
+        let actual = serde_json::to_string_pretty(&tree).expect("should parse tree into json");
+
+        assert_eq!(actual, expected);
+    }
+}

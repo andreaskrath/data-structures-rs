@@ -208,6 +208,20 @@ impl<T: PartialOrd> BinaryTree<T> {
     }
 }
 
+impl<T: PartialOrd> From<Vec<T>> for BinaryTree<T> {
+    /// Creates a `BinaryTree<T>` from `Vec<T>`.
+    ///
+    /// # Panic
+    /// The function will panic if a comparison of elements is impossible with the [`PartialOrd`] trait.
+    fn from(vec: Vec<T>) -> Self {
+        let mut tree = BinaryTree::new();
+        for v in vec {
+            tree.insert(v);
+        }
+
+        tree
+    }
+}
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 struct Item<T> {
     value: T,

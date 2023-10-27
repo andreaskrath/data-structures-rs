@@ -917,3 +917,40 @@ mod binary_tree_insert {
         tree.insert(f64::NAN);
     }
 }
+
+#[cfg(test)]
+mod binary_tree_std_trait_impls {
+    use super::{BinaryTree, Item};
+
+    #[test]
+    fn creates_tree_from_vec() {
+        let values = vec![5, 4, 6];
+        let expected = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: Some(Box::new(Item {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Item {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
+
+        let tree = BinaryTree::from(values);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    #[should_panic]
+    fn panics_when_creating_from_vec_of_incomparable_elements() {
+        let values = vec![5.0, 4.0, 6.0, f64::NAN];
+        _ = BinaryTree::from(values);
+    }
+}

@@ -222,6 +222,12 @@ impl<T: PartialOrd> From<Vec<T>> for BinaryTree<T> {
         tree
     }
 }
+
+impl<T: PartialOrd> AsRef<BinaryTree<T>> for BinaryTree<T> {
+    fn as_ref(&self) -> &BinaryTree<T> {
+        self
+    }
+}
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 struct Item<T> {
     value: T,

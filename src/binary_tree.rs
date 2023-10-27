@@ -228,6 +228,12 @@ impl<T: PartialOrd> AsRef<BinaryTree<T>> for BinaryTree<T> {
         self
     }
 }
+
+impl<T: PartialOrd> AsMut<BinaryTree<T>> for BinaryTree<T> {
+    fn as_mut(&mut self) -> &mut BinaryTree<T> {
+        self
+    }
+}
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 struct Item<T> {
     value: T,

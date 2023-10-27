@@ -1,3 +1,7 @@
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BinaryTree<T>
 where
@@ -234,6 +238,8 @@ impl<T: PartialOrd> AsMut<BinaryTree<T>> for BinaryTree<T> {
         self
     }
 }
+
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 struct Item<T> {
     value: T,

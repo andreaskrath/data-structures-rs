@@ -1,4 +1,4 @@
-#[derive(Default, Debug, Clone, PartialEq)]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BinaryTree<T>
 where
     T: PartialOrd,
@@ -208,7 +208,7 @@ impl<T: PartialOrd> BinaryTree<T> {
     }
 }
 
-#[derive(Debug, Default, Clone, PartialEq)]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 struct Item<T> {
     value: T,
     left: Option<Box<Item<T>>>,

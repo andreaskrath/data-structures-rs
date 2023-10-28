@@ -42,7 +42,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: test
-          args: --all-features
+          args: --all-targets --all-features
 
   clippy:
     name: Clippy
@@ -61,7 +61,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: -- -D warnings # this turns warnings into errors
+          args: --all-targets --all-features -- -D warnings # this turns warnings into errors
 
   rustfmt:
     name: Format

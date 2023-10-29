@@ -239,6 +239,50 @@ impl<T: PartialOrd> AsMut<BinaryTree<T>> for BinaryTree<T> {
     }
 }
 
+impl<T: PartialOrd> IntoIterator for BinaryTree<T> {
+    type Item = T;
+
+    type IntoIter = BinaryTreeIterator<T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        fn into_iter_rec<T>(node: Item<T>, vec: &mut Vec<T>) {
+            vec.push(node.value);
+
+            if let Some(left) = node.left {
+                into_iter_rec(*left, vec);
+            }
+
+            if let Some(right) = node.right {
+                into_iter_rec(*right, vec);
+            }
+        }
+
+        let mut vec = Vec::with_capacity(self.count());
+
+        if let Some(root) = self.root {
+            into_iter_rec(*root, &mut vec);
+        }
+
+        BinaryTreeIterator { vec, index: 0 }
+    }
+}
+
+pub struct BinaryTreeIterator<T> {
+    vec: Vec<T>,
+    index: usize,
+}
+
+impl<T> Iterator for BinaryTreeIterator<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        match self.vec.get(self.index) {
+            Some(_) => Some(self.vec.swap_remove(self.index)),
+            None => None,
+        }
+    }
+}
+
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 struct Item<T> {
@@ -984,6 +1028,20 @@ mod binary_tree_std_trait_impls {
     fn panics_when_creating_from_vec_of_incomparable_elements() {
         let values = vec![5.0, 4.0, 6.0, f64::NAN];
         _ = BinaryTree::from(values);
+    }
+
+    #[test]
+    fn creates_iterator_from_tree() {
+        let mut tree = BinaryTree::new();
+        tree.insert(5);
+        tree.insert(4);
+        tree.insert(6);
+
+        let mut tree_iter = tree.into_iter();
+
+        assert_eq!(tree_iter.next(), Some(5));
+        assert_eq!(tree_iter.next(), Some(6));
+        assert_eq!(tree_iter.next(), Some(4));
     }
 }
 

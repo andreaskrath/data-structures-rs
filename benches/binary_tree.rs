@@ -1,5 +1,6 @@
 use criterion::{black_box, criterion_group, criterion_main, Criterion};
 use ds_rs::binary_tree::BinaryTree;
+use rand::{thread_rng, Rng};
 
 pub fn insert(c: &mut Criterion) {
     let mut tree = BinaryTree::new();
@@ -64,5 +65,21 @@ pub fn insert(c: &mut Criterion) {
     });
 }
 
-criterion_group!(benches, insert);
+pub fn into_iter(c: &mut Criterion) {
+    let mut tree = BinaryTree::new();
+
+    for _ in 0..10000 {
+        let rand_num = thread_rng().gen_range(i32::MIN..i32::MAX);
+        tree.insert(rand_num);
+    }
+
+    c.bench_function("create iterator from 10.000 element tree", |b| {
+        b.iter(|| {
+            let iter = tree.clone().into_iter();
+            iter.for_each(|_| {});
+        })
+    });
+}
+
+criterion_group!(benches, insert, into_iter);
 criterion_main!(benches);

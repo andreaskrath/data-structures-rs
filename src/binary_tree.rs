@@ -64,7 +64,7 @@ impl<T: PartialOrd> BinaryTree<T> {
                                 Ord::Less => root.set_left(value),
                                 Ord::Greater => root.set_right(value),
                             }
-                            self.height = level;
+                            self.height = self.height.max(level);
                             self.count += 1;
                             return;
                         }
@@ -72,7 +72,7 @@ impl<T: PartialOrd> BinaryTree<T> {
                             Ord::Equal => return,
                             Ord::Less => {
                                 root.set_left(value);
-                                self.height = level;
+                                self.height = self.height.max(level);
                                 self.count += 1;
                                 return;
                             }
@@ -83,7 +83,7 @@ impl<T: PartialOrd> BinaryTree<T> {
                             Ord::Less => root = root.left_mut().unwrap(),
                             Ord::Greater => {
                                 root.set_right(value);
-                                self.height = level;
+                                self.height = self.height.max(level);
                                 self.count += 1;
                                 return;
                             }
@@ -921,6 +921,32 @@ mod binary_tree_insert {
         let mut tree = BinaryTree::new();
         tree.insert(2.0);
         tree.insert(f64::NAN);
+    }
+
+    #[test]
+    fn inserts_unevenly_and_ensures_correct_height() {
+        let mut tree = BinaryTree::new();
+        let expected = 3;
+
+        tree.insert(2);
+        tree.insert(1);
+        tree.insert(0);
+        tree.insert(3);
+
+        assert_eq!(tree.height(), expected);
+    }
+
+    #[test]
+    fn inserts_unevenly_and_ensures_correct_count() {
+        let mut tree = BinaryTree::new();
+        let expected = 4;
+
+        tree.insert(2);
+        tree.insert(1);
+        tree.insert(0);
+        tree.insert(3);
+
+        assert_eq!(tree.count(), expected);
     }
 }
 

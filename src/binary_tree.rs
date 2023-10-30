@@ -7,7 +7,7 @@ pub struct BinaryTree<T>
 where
     T: PartialOrd,
 {
-    root: Option<Box<Item<T>>>,
+    root: Option<Box<Node<T>>>,
     count: usize,
     height: usize,
 }
@@ -102,7 +102,7 @@ impl<T: PartialOrd> BinaryTree<T> {
                 // This ensures that root is not an imcomparable value.
                 _ = value.partial_cmp(&value).unwrap();
 
-                self.root = Some(Box::new(Item::new(value)));
+                self.root = Some(Box::new(Node::new(value)));
                 self.count = 1;
                 self.height = 1;
             }
@@ -245,7 +245,7 @@ impl<T: PartialOrd> IntoIterator for BinaryTree<T> {
     type IntoIter = BinaryTreeIterator<T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        fn into_iter_rec<T>(node: Item<T>, vec: &mut Vec<T>) {
+        fn into_iter_rec<T>(node: Node<T>, vec: &mut Vec<T>) {
             vec.push(node.value);
 
             if let Some(left) = node.left {
@@ -297,16 +297,16 @@ impl<T: PartialOrd> FromIterator<T> for BinaryTree<T> {
 
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
-struct Item<T> {
+struct Node<T> {
     value: T,
-    left: Option<Box<Item<T>>>,
-    right: Option<Box<Item<T>>>,
+    left: Option<Box<Node<T>>>,
+    right: Option<Box<Node<T>>>,
 }
 
-impl<T: PartialOrd> Item<T> {
-    /// Constructs a new empty `Item<T>`.
+impl<T: PartialOrd> Node<T> {
+    /// Constructs a new empty `Node<T>`.
     ///
-    /// An item has no left or right child.
+    /// An node has no left or right child.
     pub fn new(value: T) -> Self {
         Self {
             value,
@@ -315,194 +315,194 @@ impl<T: PartialOrd> Item<T> {
         }
     }
 
-    /// Returns a reference to the value of the item.
+    /// Returns a reference to the value of the node.
     pub fn value(&self) -> &T {
         &self.value
     }
 
-    /// Returns an `Option` containing a reference to the left child of the item.
+    /// Returns an `Option` containing a reference to the left child of the node.
     pub fn left(&self) -> Option<&Self> {
         self.left.as_deref()
     }
 
-    /// Returns an `Option` containing a reference to the right child of the item.
+    /// Returns an `Option` containing a reference to the right child of the node.
     pub fn right(&self) -> Option<&Self> {
         self.right.as_deref()
     }
 
-    /// Returns an `Option` containing a mutable reference to the left child of the item.
+    /// Returns an `Option` containing a mutable reference to the left child of the node.
     pub fn left_mut(&mut self) -> Option<&mut Self> {
         self.left.as_deref_mut()
     }
 
-    /// Returns an `Option` containing a mutable reference to the right child of the item.
+    /// Returns an `Option` containing a mutable reference to the right child of the node.
     pub fn right_mut(&mut self) -> Option<&mut Self> {
         self.right.as_deref_mut()
     }
 
-    /// Creates a new `Item` from the provided value, and set it as the left child of `self`.
+    /// Creates a new `Node` from the provided value, and set it as the left child of `self`.
     pub fn set_left(&mut self, value: T) {
-        self.left = Some(Box::new(Item::new(value)))
+        self.left = Some(Box::new(Node::new(value)))
     }
 
-    /// Creates a new `Item` from the provided value, and set it as the right child of `self`.
+    /// Creates a new `Node` from the provided value, and set it as the right child of `self`.
     pub fn set_right(&mut self, value: T) {
-        self.right = Some(Box::new(Item::new(value)))
+        self.right = Some(Box::new(Node::new(value)))
     }
 }
 
 #[cfg(test)]
-mod item {
-    use super::Item;
+mod node {
+    use super::Node;
 
     #[test]
     fn gets_the_value() {
-        let item = Item {
+        let node = Node {
             value: 5,
             left: None,
             right: None,
         };
-        assert_eq!(item.value(), &5);
+        assert_eq!(node.value(), &5);
     }
 
     #[test]
     fn gets_left_child_that_is_none() {
-        let item = Item {
+        let node = Node {
             value: 0,
             left: None,
             right: None,
         };
         let expected = None;
 
-        assert_eq!(item.left(), expected);
+        assert_eq!(node.left(), expected);
     }
 
     #[test]
     fn gets_left_child_that_is_some() {
-        let item = Item {
+        let node = Node {
             value: 0,
-            left: Some(Box::new(Item {
+            left: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
             })),
             right: None,
         };
-        let expected = Some(&Item {
+        let expected = Some(&Node {
             value: 5,
             left: None,
             right: None,
         });
 
-        assert_eq!(item.left(), expected);
+        assert_eq!(node.left(), expected);
     }
 
     #[test]
     fn gets_right_child_that_is_none() {
-        let item = Item {
+        let node = Node {
             value: 0,
             left: None,
             right: None,
         };
         let expected = None;
 
-        assert_eq!(item.right(), expected);
+        assert_eq!(node.right(), expected);
     }
 
     #[test]
     fn gets_right_child_that_is_some() {
-        let item = Item {
+        let node = Node {
             value: 0,
             left: None,
-            right: Some(Box::new(Item {
+            right: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
             })),
         };
-        let expected = Some(&Item {
+        let expected = Some(&Node {
             value: 5,
             left: None,
             right: None,
         });
 
-        assert_eq!(item.right(), expected);
+        assert_eq!(node.right(), expected);
     }
 
     #[test]
     fn gets_mut_left_child_that_is_none() {
-        let mut item = Item {
+        let mut node = Node {
             value: 0,
             left: None,
             right: None,
         };
         let expected = None;
 
-        assert_eq!(item.left_mut(), expected);
+        assert_eq!(node.left_mut(), expected);
     }
 
     #[test]
     fn gets_mut_left_child_that_is_some() {
-        let mut item = Item {
+        let mut node = Node {
             value: 0,
-            left: Some(Box::new(Item {
+            left: Some(Box::new(Node {
                 value: -1,
                 left: None,
                 right: None,
             })),
             right: None,
         };
-        let mut expected = Item {
+        let mut expected = Node {
             value: -1,
             left: None,
             right: None,
         };
 
-        assert_eq!(item.left_mut(), Some(&mut expected));
+        assert_eq!(node.left_mut(), Some(&mut expected));
     }
 
     #[test]
     fn gets_mut_right_child_that_is_none() {
-        let mut item = Item {
+        let mut node = Node {
             value: 0,
             left: None,
             right: None,
         };
         let expected = None;
 
-        assert_eq!(item.right_mut(), expected);
+        assert_eq!(node.right_mut(), expected);
     }
 
     #[test]
     fn gets_mut_right_child_that_is_some() {
-        let mut item = Item {
+        let mut node = Node {
             value: 0,
             left: None,
-            right: Some(Box::new(Item {
+            right: Some(Box::new(Node {
                 value: 1,
                 left: None,
                 right: None,
             })),
         };
-        let mut expected = Item {
+        let mut expected = Node {
             value: 1,
             left: None,
             right: None,
         };
 
-        assert_eq!(item.right_mut(), Some(&mut expected));
+        assert_eq!(node.right_mut(), Some(&mut expected));
     }
 
     #[test]
     fn sets_left() {
-        let mut item = Item {
+        let mut node = Node {
             value: 0,
             left: None,
             right: None,
         };
-        let expected = Item {
+        let expected = Node {
             value: 0,
-            left: Some(Box::new(Item {
+            left: Some(Box::new(Node {
                 value: -1,
                 left: None,
                 right: None,
@@ -510,35 +510,35 @@ mod item {
             right: None,
         };
 
-        item.set_left(-1);
-        assert_eq!(item, expected);
+        node.set_left(-1);
+        assert_eq!(node, expected);
     }
 
     #[test]
     fn sets_right() {
-        let mut item = Item {
+        let mut node = Node {
             value: 0,
             left: None,
             right: None,
         };
-        let expected = Item {
+        let expected = Node {
             value: 0,
             left: None,
-            right: Some(Box::new(Item {
+            right: Some(Box::new(Node {
                 value: 1,
                 left: None,
                 right: None,
             })),
         };
 
-        item.set_right(1);
-        assert_eq!(item, expected);
+        node.set_right(1);
+        assert_eq!(node, expected);
     }
 }
 
 #[cfg(test)]
 mod binary_tree_getters {
-    use super::{BinaryTree, Item};
+    use super::{BinaryTree, Node};
 
     #[test]
     fn count() {
@@ -565,7 +565,7 @@ mod binary_tree_getters {
     #[test]
     fn is_empty() {
         let tree = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
@@ -586,7 +586,7 @@ mod binary_tree_getters {
     #[test]
     fn clear() {
         let mut tree = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
@@ -610,7 +610,7 @@ mod binary_tree_getters {
     #[test]
     fn root() {
         let tree = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
@@ -631,13 +631,13 @@ mod binary_tree_getters {
 
 #[cfg(test)]
 mod binary_tree_insert {
-    use super::{BinaryTree, Item};
+    use super::{BinaryTree, Node};
 
     #[test]
     fn insert_one_element_that_becomes_root() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
@@ -653,9 +653,9 @@ mod binary_tree_insert {
     fn inserts_two_elements_second_is_left_child() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 4,
                     left: None,
                     right: None,
@@ -674,10 +674,10 @@ mod binary_tree_insert {
     fn inserts_two_elements_second_is_right_child() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
                 left: None,
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 6,
                     left: None,
                     right: None,
@@ -695,7 +695,7 @@ mod binary_tree_insert {
     fn discards_duplicate_inserts_of_root() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
@@ -712,13 +712,13 @@ mod binary_tree_insert {
     fn inserts_three_elements_second_and_third_are_right_children() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 1,
                 left: None,
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 2,
                     left: None,
-                    right: Some(Box::new(Item {
+                    right: Some(Box::new(Node {
                         value: 3,
                         left: None,
                         right: None,
@@ -738,13 +738,13 @@ mod binary_tree_insert {
     fn discards_duplicates_of_right_children() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 1,
                 left: None,
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 2,
                     left: None,
-                    right: Some(Box::new(Item {
+                    right: Some(Box::new(Node {
                         value: 3,
                         left: None,
                         right: None,
@@ -767,11 +767,11 @@ mod binary_tree_insert {
     fn inserts_three_elements_second_and_third_are_left_children() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 3,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 2,
-                    left: Some(Box::new(Item {
+                    left: Some(Box::new(Node {
                         value: 1,
                         left: None,
                         right: None,
@@ -793,11 +793,11 @@ mod binary_tree_insert {
     fn discards_duplicates_of_left_children() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 3,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 2,
-                    left: Some(Box::new(Item {
+                    left: Some(Box::new(Node {
                         value: 1,
                         left: None,
                         right: None,
@@ -822,14 +822,14 @@ mod binary_tree_insert {
     fn inserts_four_elements_zig_zag_starting_left() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 10,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 0,
                     left: None,
-                    right: Some(Box::new(Item {
+                    right: Some(Box::new(Node {
                         value: 5,
-                        left: Some(Box::new(Item {
+                        left: Some(Box::new(Node {
                             value: 3,
                             left: None,
                             right: None,
@@ -853,15 +853,15 @@ mod binary_tree_insert {
     fn inserts_four_elements_zig_zag_starting_right() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 0,
                 left: None,
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 10,
-                    left: Some(Box::new(Item {
+                    left: Some(Box::new(Node {
                         value: 3,
                         left: None,
-                        right: Some(Box::new(Item {
+                        right: Some(Box::new(Node {
                             value: 5,
                             left: None,
                             right: None,
@@ -885,14 +885,14 @@ mod binary_tree_insert {
         let mut tree1 = BinaryTree::new();
         let mut tree2 = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 2,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 1,
                     left: None,
                     right: None,
                 })),
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 3,
                     left: None,
                     right: None,
@@ -920,29 +920,29 @@ mod binary_tree_insert {
     fn creates_three_layer_tree_one_layer_at_a_time() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 50,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 25,
-                    left: Some(Box::new(Item {
+                    left: Some(Box::new(Node {
                         value: 13,
                         left: None,
                         right: None,
                     })),
-                    right: Some(Box::new(Item {
+                    right: Some(Box::new(Node {
                         value: 37,
                         left: None,
                         right: None,
                     })),
                 })),
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 75,
-                    left: Some(Box::new(Item {
+                    left: Some(Box::new(Node {
                         value: 63,
                         left: None,
                         right: None,
                     })),
-                    right: Some(Box::new(Item {
+                    right: Some(Box::new(Node {
                         value: 87,
                         left: None,
                         right: None,
@@ -1008,20 +1008,20 @@ mod binary_tree_insert {
 
 #[cfg(test)]
 mod binary_tree_std_trait_impls {
-    use super::{BinaryTree, Item};
+    use super::{BinaryTree, Node};
 
     #[test]
     fn creates_tree_from_vec() {
         let values = vec![5, 4, 6];
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 4,
                     left: None,
                     right: None,
                 })),
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 6,
                     left: None,
                     right: None,
@@ -1061,14 +1061,14 @@ mod binary_tree_std_trait_impls {
     fn creates_tree_from_iterator() {
         let tree = BinaryTree::from_iter(vec![5, 4, 6]);
         let expected_tree = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 4,
                     left: None,
                     right: None,
                 })),
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 6,
                     left: None,
                     right: None,
@@ -1086,7 +1086,7 @@ mod binary_tree_std_trait_impls {
 
 #[cfg(all(test, feature = "serde"))]
 mod binary_tree_serde {
-    use super::{BinaryTree, Item};
+    use super::{BinaryTree, Node};
     use rstest::{fixture, rstest};
 
     #[fixture]
@@ -1099,14 +1099,14 @@ mod binary_tree_serde {
         let tree: BinaryTree<i32> =
             serde_json::from_str(json_tree).expect("should parse json into tree");
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 4,
                     left: None,
                     right: None,
                 })),
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 6,
                     left: None,
                     right: None,

@@ -454,13 +454,13 @@ impl<T: PartialOrd> Node<T> {
     /// Creates a new `Node` from the provided value, and set it as the left child of `self`.
     #[inline]
     pub fn set_left(&mut self, value: T) {
-        self.left = Some(Box::new(Node::new(value)))
+        self.left = Some(Box::new(Node::new(value)));
     }
 
     /// Creates a new `Node` from the provided value, and set it as the right child of `self`.
     #[inline]
     pub fn set_right(&mut self, value: T) {
-        self.right = Some(Box::new(Node::new(value)))
+        self.right = Some(Box::new(Node::new(value)));
     }
 }
 

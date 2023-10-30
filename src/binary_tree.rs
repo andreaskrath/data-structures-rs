@@ -240,6 +240,7 @@ impl<T: PartialOrd> AsRef<BinaryTree<T>> for BinaryTree<T> {
 }
 
 impl<T: PartialOrd> AsMut<BinaryTree<T>> for BinaryTree<T> {
+    /// Returns a mutable reference to the `BinaryTree`.
     #[inline]
     fn as_mut(&mut self) -> &mut BinaryTree<T> {
         self

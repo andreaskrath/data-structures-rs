@@ -314,6 +314,7 @@ impl<T> Iterator for BinaryTreeIntoIterator<T> {
 }
 
 impl<T: PartialOrd> FromIterator<T> for BinaryTree<T> {
+    /// Constructs a `BinaryTree<T>` from an iterator for `T`.
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         let mut tree = BinaryTree::new();
 

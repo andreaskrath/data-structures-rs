@@ -239,13 +239,13 @@ impl<T: PartialOrd> AsMut<BinaryTree<T>> for BinaryTree<T> {
     }
 }
 
-impl<T: PartialOrd> IntoIterator for BinaryTree<T> {
-    type Item = T;
+impl<T1: PartialOrd> IntoIterator for BinaryTree<T1> {
+    type Item = T1;
 
-    type IntoIter = BinaryTreeIterator<T>;
+    type IntoIter = BinaryTreeIterator<T1>;
 
     fn into_iter(self) -> Self::IntoIter {
-        fn into_iter_rec<T>(node: Node<T>, vec: &mut Vec<T>) {
+        fn into_iter_rec<T2>(node: Node<T2>, vec: &mut Vec<T2>) {
             vec.push(node.value);
 
             if let Some(left) = node.left {

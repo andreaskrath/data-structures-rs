@@ -232,7 +232,7 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// assert_eq!(tree_iter.next(), None);
     /// ```
     #[inline]
-    pub fn iter(&self) -> BinaryTreeIterator<'_, T> {
+    pub fn iter(&self) -> Iter<'_, T> {
         self.as_ref().into_iter()
     }
 }
@@ -348,7 +348,7 @@ impl<T: PartialOrd> FromIterator<T> for BinaryTree<T> {
 impl<'a, T: PartialOrd> IntoIterator for &'a BinaryTree<T> {
     type Item = &'a T;
 
-    type IntoIter = BinaryTreeIterator<'a, T>;
+    type IntoIter = Iter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
         let mut values = Vec::with_capacity(self.count);
@@ -370,7 +370,7 @@ impl<'a, T: PartialOrd> IntoIterator for &'a BinaryTree<T> {
             }
         }
 
-        BinaryTreeIterator {
+        Iter {
             vec: values,
             index: 0,
         }
@@ -380,12 +380,12 @@ impl<'a, T: PartialOrd> IntoIterator for &'a BinaryTree<T> {
 /// An iterator that borrows from the `BinaryTree`.
 ///
 /// This `struct` is created by the `iter` method on [`BinaryTree`].
-pub struct BinaryTreeIterator<'a, T> {
+pub struct Iter<'a, T> {
     vec: Vec<&'a T>,
     index: usize,
 }
 
-impl<'a, T> Iterator for BinaryTreeIterator<'a, T> {
+impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {

@@ -52,62 +52,59 @@ impl<T: PartialOrd> BinaryTree<T> {
     pub fn insert(&mut self, value: T) {
         use std::cmp::Ordering as Ord;
 
-        match self.root.as_deref_mut() {
-            Some(mut root) => {
-                // An empty tree is height 0, while a tree with only a root is height 1
-                // meaning this arm, which is entered when root is not empty
-                // automatically starts at level 2 in terms of height.
-                let mut level: usize = 2;
-                loop {
-                    match (root.left(), root.right()) {
-                        (None, None) => {
-                            match value.partial_cmp(root.value()).unwrap() {
-                                Ord::Equal => return,
-                                Ord::Less => root.set_left(value),
-                                Ord::Greater => root.set_right(value),
-                            }
+        if let Some(mut root) = self.root.as_deref_mut() {
+            // An empty tree is height 0, while a tree with only a root is height 1
+            // meaning this arm, which is entered when root is not empty
+            // automatically starts at level 2 in terms of height.
+            let mut level: usize = 2;
+            loop {
+                match (root.left(), root.right()) {
+                    (None, None) => {
+                        match value.partial_cmp(root.value()).unwrap() {
+                            Ord::Equal => return,
+                            Ord::Less => root.set_left(value),
+                            Ord::Greater => root.set_right(value),
+                        }
+                        self.height = self.height.max(level);
+                        self.count += 1;
+                        return;
+                    }
+                    (None, Some(_)) => match value.partial_cmp(root.value()).unwrap() {
+                        Ord::Equal => return,
+                        Ord::Less => {
+                            root.set_left(value);
                             self.height = self.height.max(level);
                             self.count += 1;
                             return;
                         }
-                        (None, Some(_)) => match value.partial_cmp(root.value()).unwrap() {
-                            Ord::Equal => return,
-                            Ord::Less => {
-                                root.set_left(value);
-                                self.height = self.height.max(level);
-                                self.count += 1;
-                                return;
-                            }
-                            Ord::Greater => root = root.right_mut().unwrap(),
-                        },
-                        (Some(_), None) => match value.partial_cmp(root.value()).unwrap() {
-                            Ord::Equal => return,
-                            Ord::Less => root = root.left_mut().unwrap(),
-                            Ord::Greater => {
-                                root.set_right(value);
-                                self.height = self.height.max(level);
-                                self.count += 1;
-                                return;
-                            }
-                        },
-                        (Some(_), Some(_)) => match value.partial_cmp(root.value()).unwrap() {
-                            Ord::Equal => return,
-                            Ord::Less => root = root.left_mut().unwrap(),
-                            Ord::Greater => root = root.right_mut().unwrap(),
-                        },
-                    }
-
-                    level += 1;
+                        Ord::Greater => root = root.right_mut().unwrap(),
+                    },
+                    (Some(_), None) => match value.partial_cmp(root.value()).unwrap() {
+                        Ord::Equal => return,
+                        Ord::Less => root = root.left_mut().unwrap(),
+                        Ord::Greater => {
+                            root.set_right(value);
+                            self.height = self.height.max(level);
+                            self.count += 1;
+                            return;
+                        }
+                    },
+                    (Some(_), Some(_)) => match value.partial_cmp(root.value()).unwrap() {
+                        Ord::Equal => return,
+                        Ord::Less => root = root.left_mut().unwrap(),
+                        Ord::Greater => root = root.right_mut().unwrap(),
+                    },
                 }
-            }
-            None => {
-                // This ensures that root is not an imcomparable value.
-                _ = value.partial_cmp(&value).unwrap();
 
-                self.root = Some(Box::new(Node::new(value)));
-                self.count = 1;
-                self.height = 1;
+                level += 1;
             }
+        } else {
+            // This ensures that root is not an imcomparable value.
+            _ = value.partial_cmp(&value).unwrap();
+
+            self.root = Some(Box::new(Node::new(value)));
+            self.count = 1;
+            self.height = 1;
         }
     }
 

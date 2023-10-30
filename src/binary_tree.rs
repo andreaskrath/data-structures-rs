@@ -272,7 +272,7 @@ impl<T: PartialOrd> AsMut<BinaryTree<T>> for BinaryTree<T> {
 impl<T: PartialOrd> IntoIterator for BinaryTree<T> {
     type Item = T;
 
-    type IntoIter = BinaryTreeIntoIterator<T>;
+    type IntoIter = IntoIter<T>;
 
     /// Returns a consuming iterator over the `BinaryTree`.
     ///
@@ -311,7 +311,7 @@ impl<T: PartialOrd> IntoIterator for BinaryTree<T> {
             }
         }
 
-        BinaryTreeIntoIterator {
+        IntoIter {
             vec: values.into_iter(),
         }
     }
@@ -320,11 +320,11 @@ impl<T: PartialOrd> IntoIterator for BinaryTree<T> {
 /// An iterator that moves out of the `BinaryTree`.
 ///
 /// This `struct` is created by the `into_iter` method on [`BinaryTree`] (provided by the [`IntoIterator`] trait).
-pub struct BinaryTreeIntoIterator<T> {
+pub struct IntoIter<T> {
     vec: std::vec::IntoIter<T>,
 }
 
-impl<T> Iterator for BinaryTreeIntoIterator<T> {
+impl<T> Iterator for IntoIter<T> {
     type Item = T;
 
     #[inline]

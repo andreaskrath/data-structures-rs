@@ -239,31 +239,35 @@ impl<T: PartialOrd> AsMut<BinaryTree<T>> for BinaryTree<T> {
     }
 }
 
-impl<T1: PartialOrd> IntoIterator for BinaryTree<T1> {
-    type Item = T1;
+impl<T: PartialOrd> IntoIterator for BinaryTree<T> {
+    type Item = T;
 
-    type IntoIter = BinaryTreeIterator<T1>;
+    type IntoIter = BinaryTreeIterator<T>;
 
     fn into_iter(self) -> Self::IntoIter {
-        fn into_iter_rec<T2>(node: Node<T2>, vec: &mut Vec<T2>) {
-            vec.push(node.value);
-
-            if let Some(left) = node.left {
-                into_iter_rec(*left, vec);
-            }
-
-            if let Some(right) = node.right {
-                into_iter_rec(*right, vec);
-            }
-        }
-
-        let mut vec = Vec::with_capacity(self.count());
+        let mut values = Vec::with_capacity(self.count);
+        let mut queue = Vec::new();
 
         if let Some(root) = self.root {
-            into_iter_rec(*root, &mut vec);
+            queue.push(root);
+
+            while let Some(node) = queue.pop() {
+                values.push(node.value);
+
+                if let Some(left) = node.left {
+                    queue.push(left);
+                }
+
+                if let Some(right) = node.right {
+                    queue.push(right);
+                }
+            }
         }
 
-        BinaryTreeIterator { vec, index: 0 }
+        BinaryTreeIterator {
+            vec: values,
+            index: 0,
+        }
     }
 }
 
@@ -1052,9 +1056,58 @@ mod binary_tree_std_trait_impls {
         let mut tree_iter = tree.into_iter();
 
         assert_eq!(tree_iter.next(), Some(5));
-        assert_eq!(tree_iter.next(), Some(6));
         assert_eq!(tree_iter.next(), Some(4));
+        assert_eq!(tree_iter.next(), Some(6));
         assert_eq!(tree_iter.next(), None);
+    }
+
+    #[test]
+    fn creates_iterator_from_large_tree() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 50,
+                left: Some(Box::new(Node {
+                    value: 25,
+                    left: Some(Box::new(Node {
+                        value: 13,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 37,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+                right: Some(Box::new(Node {
+                    value: 75,
+                    left: Some(Box::new(Node {
+                        value: 63,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 87,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+            })),
+            count: 7,
+            height: 3,
+        };
+
+        let mut iter = tree.into_iter();
+
+        // because the queue is FIFO the order is sort of messy
+        assert_eq!(iter.next(), Some(50));
+        assert_eq!(iter.next(), Some(13));
+        assert_eq!(iter.next(), Some(37));
+        assert_eq!(iter.next(), Some(25));
+        assert_eq!(iter.next(), Some(63));
+        assert_eq!(iter.next(), Some(87));
+        assert_eq!(iter.next(), Some(75));
+        assert_eq!(iter.next(), None);
     }
 
     #[test]

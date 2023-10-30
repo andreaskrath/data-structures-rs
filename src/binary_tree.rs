@@ -232,6 +232,7 @@ impl<T: PartialOrd> From<Vec<T>> for BinaryTree<T> {
 }
 
 impl<T: PartialOrd> AsRef<BinaryTree<T>> for BinaryTree<T> {
+    /// Returns an immutable reference to the `BinaryTree`.
     #[inline]
     fn as_ref(&self) -> &BinaryTree<T> {
         self

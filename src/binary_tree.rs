@@ -291,6 +291,7 @@ impl<T: PartialOrd> IntoIterator for BinaryTree<T> {
     /// // the iterator is now empty
     /// assert_eq!(tree_iter.next(), None);
     /// ```
+    #[must_use = "iterators are evaluated lazily"]
     fn into_iter(self) -> Self::IntoIter {
         let mut values = Vec::with_capacity(self.count);
         let mut queue = VecDeque::new();

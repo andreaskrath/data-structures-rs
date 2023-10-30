@@ -1,3 +1,5 @@
+use std::collections::VecDeque;
+
 #[cfg(feature = "serde")]
 use serde::{Deserialize, Serialize};
 
@@ -250,49 +252,64 @@ impl<T: PartialOrd> AsMut<BinaryTree<T>> for BinaryTree<T> {
 impl<T: PartialOrd> IntoIterator for BinaryTree<T> {
     type Item = T;
 
-    type IntoIter = BinaryTreeIterator<T>;
+    type IntoIter = BinaryTreeIntoIterator<T>;
 
+    /// Returns a consuming iterator over the `BinaryTree`.
+    ///
+    /// The iterator yields all items in the tree using the **preorder tree traversal techinque**.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let tree = BinaryTree::from(vec![5, 4, 6]);
+    /// let mut tree_iter = tree.into_iter();
+    ///
+    /// assert_eq!(tree_iter.next(), Some(5));
+    /// assert_eq!(tree_iter.next(), Some(4));
+    /// assert_eq!(tree_iter.next(), Some(6));
+    ///
+    /// // the iterator is now empty
+    /// assert_eq!(tree_iter.next(), None);
+    /// ```
     fn into_iter(self) -> Self::IntoIter {
         let mut values = Vec::with_capacity(self.count);
-        let mut queue = Vec::new();
+        let mut queue = VecDeque::new();
 
         if let Some(root) = self.root {
-            queue.push(root);
+            queue.push_front(root);
 
-            while let Some(node) = queue.pop() {
+            while let Some(node) = queue.pop_front() {
                 values.push(node.value);
 
-                if let Some(left) = node.left {
-                    queue.push(left);
+                if let Some(right) = node.right {
+                    queue.push_front(right);
                 }
 
-                if let Some(right) = node.right {
-                    queue.push(right);
+                if let Some(left) = node.left {
+                    queue.push_front(left);
                 }
             }
         }
 
-        BinaryTreeIterator {
-            vec: values,
-            index: 0,
+        BinaryTreeIntoIterator {
+            vec: values.into_iter(),
         }
     }
 }
 
-pub struct BinaryTreeIterator<T> {
-    vec: Vec<T>,
-    index: usize,
+/// An iterator that moves out of the `BinaryTree`.
+///
+/// This `struct` is created by the `into_iter` method on [`BinaryTree`] (provided by the [`IntoIterator`] trait).
+pub struct BinaryTreeIntoIterator<T> {
+    vec: std::vec::IntoIter<T>,
 }
 
-impl<T> Iterator for BinaryTreeIterator<T> {
+impl<T> Iterator for BinaryTreeIntoIterator<T> {
     type Item = T;
 
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
-        match self.vec.get(self.index) {
-            Some(_) => Some(self.vec.swap_remove(self.index)),
-            None => None,
-        }
+        self.vec.next()
     }
 }
 
@@ -1063,11 +1080,24 @@ mod binary_tree_std_trait_impls {
     }
 
     #[test]
-    fn creates_iterator_from_tree() {
-        let mut tree = BinaryTree::new();
-        tree.insert(5);
-        tree.insert(4);
-        tree.insert(6);
+    fn into_iter_from_small_tree() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: Some(Box::new(Node {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Node {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
 
         let mut tree_iter = tree.into_iter();
 
@@ -1078,7 +1108,7 @@ mod binary_tree_std_trait_impls {
     }
 
     #[test]
-    fn creates_iterator_from_large_tree() {
+    fn into_iter_from_large_tree() {
         let tree = BinaryTree {
             root: Some(Box::new(Node {
                 value: 50,
@@ -1115,14 +1145,13 @@ mod binary_tree_std_trait_impls {
 
         let mut iter = tree.into_iter();
 
-        // because the queue is FIFO the order is sort of messy
         assert_eq!(iter.next(), Some(50));
+        assert_eq!(iter.next(), Some(25));
         assert_eq!(iter.next(), Some(13));
         assert_eq!(iter.next(), Some(37));
-        assert_eq!(iter.next(), Some(25));
+        assert_eq!(iter.next(), Some(75));
         assert_eq!(iter.next(), Some(63));
         assert_eq!(iter.next(), Some(87));
-        assert_eq!(iter.next(), Some(75));
         assert_eq!(iter.next(), None);
     }
 

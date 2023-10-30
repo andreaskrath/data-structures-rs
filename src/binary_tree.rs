@@ -216,6 +216,28 @@ impl<T: PartialOrd> BinaryTree<T> {
     pub fn count(&self) -> usize {
         self.count
     }
+
+    /// Returns a non-consuming iterator over the `BinaryTree`.
+    ///
+    /// The iterator yields all items in the tree using the **preorder tree traversal techinque**.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let tree = BinaryTree::from(vec![5, 4, 6]);
+    /// let mut tree_iter = tree.iter();
+    ///
+    /// assert_eq!(tree_iter.next(), Some(&5));
+    /// assert_eq!(tree_iter.next(), Some(&4));
+    /// assert_eq!(tree_iter.next(), Some(&6));
+    ///
+    /// // the iterator is now empty
+    /// assert_eq!(tree_iter.next(), None);
+    /// ```
+    #[inline]
+    pub fn iter(&self) -> BinaryTreeIterator<'_, T> {
+        self.as_ref().into_iter()
+    }
 }
 
 impl<T: PartialOrd> From<Vec<T>> for BinaryTree<T> {
@@ -323,6 +345,60 @@ impl<T: PartialOrd> FromIterator<T> for BinaryTree<T> {
         }
 
         tree
+    }
+}
+
+impl<'a, T: PartialOrd> IntoIterator for &'a BinaryTree<T> {
+    type Item = &'a T;
+
+    type IntoIter = BinaryTreeIterator<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let mut values = Vec::with_capacity(self.count);
+        let mut queue = VecDeque::new();
+
+        if let Some(root) = &self.root {
+            queue.push_front(root);
+
+            while let Some(node) = queue.pop_front() {
+                values.push(&node.value);
+
+                if let Some(right) = &node.right {
+                    queue.push_front(right);
+                }
+
+                if let Some(left) = &node.left {
+                    queue.push_front(left);
+                }
+            }
+        }
+
+        BinaryTreeIterator {
+            vec: values,
+            index: 0,
+        }
+    }
+}
+
+/// An iterator that borrows from the `BinaryTree`.
+///
+/// This `struct` is created by the `iter` method on [`BinaryTree`].
+pub struct BinaryTreeIterator<'a, T> {
+    vec: Vec<&'a T>,
+    index: usize,
+}
+
+impl<'a, T> Iterator for BinaryTreeIterator<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let val = match self.vec.get(self.index) {
+            Some(_) => Some(self.vec[self.index]),
+            None => None,
+        };
+        self.index += 1;
+
+        val
     }
 }
 
@@ -1178,6 +1254,82 @@ mod binary_tree_std_trait_impls {
         };
 
         assert_eq!(tree, expected)
+    }
+
+    #[test]
+    fn iter_from_tree() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: Some(Box::new(Node {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Node {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
+
+        let mut iter = tree.iter();
+
+        assert_eq!(iter.next(), Some(&5));
+        assert_eq!(iter.next(), Some(&4));
+        assert_eq!(iter.next(), Some(&6));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn iter_from_large_tree() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 50,
+                left: Some(Box::new(Node {
+                    value: 25,
+                    left: Some(Box::new(Node {
+                        value: 13,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 37,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+                right: Some(Box::new(Node {
+                    value: 75,
+                    left: Some(Box::new(Node {
+                        value: 63,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 87,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+            })),
+            count: 7,
+            height: 3,
+        };
+
+        let mut iter = tree.iter();
+
+        assert_eq!(iter.next(), Some(&50));
+        assert_eq!(iter.next(), Some(&25));
+        assert_eq!(iter.next(), Some(&13));
+        assert_eq!(iter.next(), Some(&37));
+        assert_eq!(iter.next(), Some(&75));
+        assert_eq!(iter.next(), Some(&63));
+        assert_eq!(iter.next(), Some(&87));
+        assert_eq!(iter.next(), None);
     }
 }
 

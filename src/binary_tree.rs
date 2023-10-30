@@ -120,6 +120,7 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// tree.insert(0);
     /// assert!(!tree.is_empty());
     /// ```
+    #[inline]
     pub fn is_empty(&self) -> bool {
         self.root.is_none()
     }
@@ -138,6 +139,7 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// tree.clear();
     /// assert!(tree.is_empty());
     /// ```
+    #[inline]
     pub fn clear(&mut self) {
         self.root = None;
         self.count = 0;
@@ -167,6 +169,7 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// tree.insert(1);
     /// assert_eq!(tree.height(), 2);
     /// ```
+    #[inline]
     pub fn height(&self) -> usize {
         self.height
     }
@@ -207,6 +210,7 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// tree.insert(6);
     /// assert_eq!(tree.count(), 2);
     /// ```
+    #[inline]
     pub fn count(&self) -> usize {
         self.count
     }
@@ -228,12 +232,14 @@ impl<T: PartialOrd> From<Vec<T>> for BinaryTree<T> {
 }
 
 impl<T: PartialOrd> AsRef<BinaryTree<T>> for BinaryTree<T> {
+    #[inline]
     fn as_ref(&self) -> &BinaryTree<T> {
         self
     }
 }
 
 impl<T: PartialOrd> AsMut<BinaryTree<T>> for BinaryTree<T> {
+    #[inline]
     fn as_mut(&mut self) -> &mut BinaryTree<T> {
         self
     }
@@ -279,6 +285,7 @@ pub struct BinaryTreeIterator<T> {
 impl<T> Iterator for BinaryTreeIterator<T> {
     type Item = T;
 
+    #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         match self.vec.get(self.index) {
             Some(_) => Some(self.vec.swap_remove(self.index)),
@@ -320,36 +327,43 @@ impl<T: PartialOrd> Node<T> {
     }
 
     /// Returns a reference to the value of the node.
+    #[inline]
     pub fn value(&self) -> &T {
         &self.value
     }
 
     /// Returns an `Option` containing a reference to the left child of the node.
+    #[inline]
     pub fn left(&self) -> Option<&Self> {
         self.left.as_deref()
     }
 
     /// Returns an `Option` containing a reference to the right child of the node.
+    #[inline]
     pub fn right(&self) -> Option<&Self> {
         self.right.as_deref()
     }
 
     /// Returns an `Option` containing a mutable reference to the left child of the node.
+    #[inline]
     pub fn left_mut(&mut self) -> Option<&mut Self> {
         self.left.as_deref_mut()
     }
 
     /// Returns an `Option` containing a mutable reference to the right child of the node.
+    #[inline]
     pub fn right_mut(&mut self) -> Option<&mut Self> {
         self.right.as_deref_mut()
     }
 
     /// Creates a new `Node` from the provided value, and set it as the left child of `self`.
+    #[inline]
     pub fn set_left(&mut self, value: T) {
         self.left = Some(Box::new(Node::new(value)))
     }
 
     /// Creates a new `Node` from the provided value, and set it as the right child of `self`.
+    #[inline]
     pub fn set_right(&mut self, value: T) {
         self.right = Some(Box::new(Node::new(value)))
     }

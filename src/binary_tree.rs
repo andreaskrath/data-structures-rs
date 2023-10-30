@@ -1042,6 +1042,7 @@ mod binary_tree_std_trait_impls {
         assert_eq!(tree_iter.next(), Some(5));
         assert_eq!(tree_iter.next(), Some(6));
         assert_eq!(tree_iter.next(), Some(4));
+        assert_eq!(tree_iter.next(), None);
     }
 }
 

@@ -232,6 +232,7 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// assert_eq!(tree_iter.next(), None);
     /// ```
     #[inline]
+    #[must_use = "iterators are evaluated lazily"]
     pub fn iter(&self) -> Iter<'_, T> {
         self.as_ref().into_iter()
     }

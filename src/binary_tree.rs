@@ -283,6 +283,18 @@ impl<T> Iterator for BinaryTreeIterator<T> {
     }
 }
 
+impl<T: PartialOrd> FromIterator<T> for BinaryTree<T> {
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let mut tree = BinaryTree::new();
+
+        for v in iter {
+            tree.insert(v);
+        }
+
+        tree
+    }
+}
+
 #[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 struct Item<T> {
@@ -1043,6 +1055,32 @@ mod binary_tree_std_trait_impls {
         assert_eq!(tree_iter.next(), Some(6));
         assert_eq!(tree_iter.next(), Some(4));
         assert_eq!(tree_iter.next(), None);
+    }
+
+    #[test]
+    fn creates_tree_from_iterator() {
+        let tree = BinaryTree::from_iter(vec![5, 4, 6]);
+        let expected_tree = BinaryTree {
+            root: Some(Box::new(Item {
+                value: 5,
+                left: Some(Box::new(Item {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Item {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
+
+        assert_eq!(tree, expected_tree);
+        assert_eq!(tree.height(), 2);
+        assert_eq!(tree.count(), 3);
     }
 }
 

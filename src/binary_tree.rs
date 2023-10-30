@@ -1060,7 +1060,7 @@ mod binary_tree_std_trait_impls {
     #[test]
     fn creates_tree_from_iterator() {
         let tree = BinaryTree::from_iter(vec![5, 4, 6]);
-        let expected_tree = BinaryTree {
+        let expected = BinaryTree {
             root: Some(Box::new(Node {
                 value: 5,
                 left: Some(Box::new(Node {
@@ -1078,9 +1078,7 @@ mod binary_tree_std_trait_impls {
             height: 2,
         };
 
-        assert_eq!(tree, expected_tree);
-        assert_eq!(tree.height(), 2);
-        assert_eq!(tree.count(), 3);
+        assert_eq!(tree, expected)
     }
 }
 

@@ -269,6 +269,19 @@ impl<T: PartialOrd> AsMut<BinaryTree<T>> for BinaryTree<T> {
     }
 }
 
+impl<T: PartialOrd> FromIterator<T> for BinaryTree<T> {
+    /// Constructs a `BinaryTree<T>` from an iterator for `T`.
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let mut tree = BinaryTree::new();
+
+        for v in iter {
+            tree.insert(v);
+        }
+
+        tree
+    }
+}
+
 impl<T: PartialOrd> IntoIterator for BinaryTree<T> {
     type Item = T;
 
@@ -331,19 +344,6 @@ impl<T> Iterator for IntoIter<T> {
     #[inline]
     fn next(&mut self) -> Option<Self::Item> {
         self.vec.next()
-    }
-}
-
-impl<T: PartialOrd> FromIterator<T> for BinaryTree<T> {
-    /// Constructs a `BinaryTree<T>` from an iterator for `T`.
-    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
-        let mut tree = BinaryTree::new();
-
-        for v in iter {
-            tree.insert(v);
-        }
-
-        tree
     }
 }
 

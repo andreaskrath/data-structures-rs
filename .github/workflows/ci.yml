@@ -14,6 +14,8 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
+      - name: Cache 
+        uses: Swatinem/rust-cache@v2
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -32,6 +34,8 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
+      - name: Cache 
+        uses: Swatinem/rust-cache@v2
       - name: Install stable toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -50,6 +54,8 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v3
+      - name: Cache 
+        uses: Swatinem/rust-cache@v2
       - name: Install stable toolchain with clippy available
         uses: actions-rs/toolchain@v1
         with:

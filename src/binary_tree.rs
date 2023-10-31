@@ -282,6 +282,15 @@ impl<T: PartialOrd> FromIterator<T> for BinaryTree<T> {
     }
 }
 
+impl<T: PartialOrd> Extend<T> for BinaryTree<T> {
+    /// Extends the `BinaryTree` with the contents of the provided iterator.
+    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
+        for v in iter {
+            self.insert(v);
+        }
+    }
+}
+
 impl<T: PartialOrd> IntoIterator for BinaryTree<T> {
     type Item = T;
 

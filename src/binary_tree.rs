@@ -659,7 +659,7 @@ mod node {
 }
 
 #[cfg(test)]
-mod binary_tree_getters {
+mod getters {
     use super::{BinaryTree, Node};
 
     #[test]
@@ -752,7 +752,7 @@ mod binary_tree_getters {
 }
 
 #[cfg(test)]
-mod binary_tree_insert {
+mod insert {
     use super::{BinaryTree, Node};
 
     #[test]
@@ -1129,7 +1129,7 @@ mod binary_tree_insert {
 }
 
 #[cfg(test)]
-mod binary_tree_std_trait_impls {
+mod iterator_trait_impls {
     use super::{BinaryTree, Node};
 
     #[test]
@@ -1342,7 +1342,7 @@ mod binary_tree_std_trait_impls {
 }
 
 #[cfg(all(test, feature = "serde"))]
-mod binary_tree_serde {
+mod json {
     use super::{BinaryTree, Node};
     use rstest::{fixture, rstest};
 

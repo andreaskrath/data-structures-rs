@@ -1,9 +1,15 @@
-#[derive(Default, Debug, Clone, PartialEq)]
+use std::collections::VecDeque;
+
+#[cfg(feature = "serde")]
+use serde::{Deserialize, Serialize};
+
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BinaryTree<T>
 where
     T: PartialOrd,
 {
-    root: Option<Box<Item<T>>>,
+    root: Option<Box<Node<T>>>,
     count: usize,
     height: usize,
 }
@@ -31,8 +37,8 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// Inserts the provided value into the `BinaryTree`,
     /// and preserves the properties of the binary tree.
     ///
-    /// # Panic
-    /// The function will panic if a comparison is impossible with the [`PartialOrd`] trait.
+    /// # Panics
+    /// The function will panic if a comparison of elements is impossible with the [`PartialOrd`] trait.
     ///
     /// # Examples
     /// ```
@@ -46,62 +52,59 @@ impl<T: PartialOrd> BinaryTree<T> {
     pub fn insert(&mut self, value: T) {
         use std::cmp::Ordering as Ord;
 
-        match self.root.as_deref_mut() {
-            Some(mut root) => {
-                // An empty tree is height 0, while a tree with only a root is height 1
-                // meaning this arm, which is entered when root is not empty
-                // automatically starts at level 2 in terms of height.
-                let mut level: usize = 2;
-                loop {
-                    match (root.left(), root.right()) {
-                        (None, None) => {
-                            match value.partial_cmp(root.value()).unwrap() {
-                                Ord::Equal => return,
-                                Ord::Less => root.set_left(value),
-                                Ord::Greater => root.set_right(value),
-                            }
-                            self.height = level;
+        if let Some(mut root) = self.root.as_deref_mut() {
+            // An empty tree is height 0, while a tree with only a root is height 1
+            // meaning this arm, which is entered when root is not empty
+            // automatically starts at level 2 in terms of height.
+            let mut level: usize = 2;
+            loop {
+                match (root.left(), root.right()) {
+                    (None, None) => {
+                        match value.partial_cmp(root.value()).unwrap() {
+                            Ord::Equal => return,
+                            Ord::Less => root.set_left(value),
+                            Ord::Greater => root.set_right(value),
+                        }
+                        self.height = self.height.max(level);
+                        self.count += 1;
+                        return;
+                    }
+                    (None, Some(_)) => match value.partial_cmp(root.value()).unwrap() {
+                        Ord::Equal => return,
+                        Ord::Less => {
+                            root.set_left(value);
+                            self.height = self.height.max(level);
                             self.count += 1;
                             return;
                         }
-                        (None, Some(_)) => match value.partial_cmp(root.value()).unwrap() {
-                            Ord::Equal => return,
-                            Ord::Less => {
-                                root.set_left(value);
-                                self.height = level;
-                                self.count += 1;
-                                return;
-                            }
-                            Ord::Greater => root = root.right_mut().unwrap(),
-                        },
-                        (Some(_), None) => match value.partial_cmp(root.value()).unwrap() {
-                            Ord::Equal => return,
-                            Ord::Less => root = root.left_mut().unwrap(),
-                            Ord::Greater => {
-                                root.set_right(value);
-                                self.height = level;
-                                self.count += 1;
-                                return;
-                            }
-                        },
-                        (Some(_), Some(_)) => match value.partial_cmp(root.value()).unwrap() {
-                            Ord::Equal => return,
-                            Ord::Less => root = root.left_mut().unwrap(),
-                            Ord::Greater => root = root.right_mut().unwrap(),
-                        },
-                    }
-
-                    level += 1;
+                        Ord::Greater => root = root.right_mut().unwrap(),
+                    },
+                    (Some(_), None) => match value.partial_cmp(root.value()).unwrap() {
+                        Ord::Equal => return,
+                        Ord::Less => root = root.left_mut().unwrap(),
+                        Ord::Greater => {
+                            root.set_right(value);
+                            self.height = self.height.max(level);
+                            self.count += 1;
+                            return;
+                        }
+                    },
+                    (Some(_), Some(_)) => match value.partial_cmp(root.value()).unwrap() {
+                        Ord::Equal => return,
+                        Ord::Less => root = root.left_mut().unwrap(),
+                        Ord::Greater => root = root.right_mut().unwrap(),
+                    },
                 }
-            }
-            None => {
-                // This ensures that root is not an imcomparable value.
-                _ = value.partial_cmp(&value).unwrap();
 
-                self.root = Some(Box::new(Item::new(value)));
-                self.count = 1;
-                self.height = 1;
+                level += 1;
             }
+        } else {
+            // This ensures that root is not an imcomparable value.
+            _ = value.partial_cmp(&value).unwrap();
+
+            self.root = Some(Box::new(Node::new(value)));
+            self.count = 1;
+            self.height = 1;
         }
     }
 
@@ -116,6 +119,7 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// tree.insert(0);
     /// assert!(!tree.is_empty());
     /// ```
+    #[inline]
     pub fn is_empty(&self) -> bool {
         self.root.is_none()
     }
@@ -134,6 +138,7 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// tree.clear();
     /// assert!(tree.is_empty());
     /// ```
+    #[inline]
     pub fn clear(&mut self) {
         self.root = None;
         self.count = 0;
@@ -163,6 +168,7 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// tree.insert(1);
     /// assert_eq!(tree.height(), 2);
     /// ```
+    #[inline]
     pub fn height(&self) -> usize {
         self.height
     }
@@ -203,22 +209,219 @@ impl<T: PartialOrd> BinaryTree<T> {
     /// tree.insert(6);
     /// assert_eq!(tree.count(), 2);
     /// ```
+    #[inline]
     pub fn count(&self) -> usize {
         self.count
     }
-}
 
-#[derive(Debug, Default, Clone, PartialEq)]
-struct Item<T> {
-    value: T,
-    left: Option<Box<Item<T>>>,
-    right: Option<Box<Item<T>>>,
-}
-
-impl<T: PartialOrd> Item<T> {
-    /// Constructs a new empty `Item<T>`.
+    /// Returns a non-consuming iterator over the `BinaryTree`.
     ///
-    /// An item has no left or right child.
+    /// The iterator yields all items in the tree using the **preorder tree traversal techinque**.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let tree = BinaryTree::from(vec![5, 4, 6]);
+    /// let mut tree_iter = tree.iter();
+    ///
+    /// assert_eq!(tree_iter.next(), Some(&5));
+    /// assert_eq!(tree_iter.next(), Some(&4));
+    /// assert_eq!(tree_iter.next(), Some(&6));
+    ///
+    /// // the iterator is now empty
+    /// assert_eq!(tree_iter.next(), None);
+    /// ```
+    #[inline]
+    #[must_use = "iterators are evaluated lazily"]
+    pub fn iter(&self) -> Iter<'_, T> {
+        self.as_ref().into_iter()
+    }
+}
+
+impl<T: PartialOrd> From<Vec<T>> for BinaryTree<T> {
+    /// Creates a `BinaryTree<T>` from `Vec<T>`.
+    ///
+    /// # Panic
+    /// The function will panic if a comparison of elements is impossible with the [`PartialOrd`] trait.
+    fn from(vec: Vec<T>) -> Self {
+        let mut tree = BinaryTree::new();
+        for v in vec {
+            tree.insert(v);
+        }
+
+        tree
+    }
+}
+
+impl<T: PartialOrd> AsRef<BinaryTree<T>> for BinaryTree<T> {
+    /// Returns an immutable reference to the `BinaryTree`.
+    #[inline]
+    fn as_ref(&self) -> &BinaryTree<T> {
+        self
+    }
+}
+
+impl<T: PartialOrd> AsMut<BinaryTree<T>> for BinaryTree<T> {
+    /// Returns a mutable reference to the `BinaryTree`.
+    #[inline]
+    fn as_mut(&mut self) -> &mut BinaryTree<T> {
+        self
+    }
+}
+
+impl<T: PartialOrd> FromIterator<T> for BinaryTree<T> {
+    /// Constructs a `BinaryTree<T>` from an iterator for `T`.
+    fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
+        let mut tree = BinaryTree::new();
+
+        for v in iter {
+            tree.insert(v);
+        }
+
+        tree
+    }
+}
+
+impl<T: PartialOrd> Extend<T> for BinaryTree<T> {
+    /// Extends the `BinaryTree` with the contents of the provided iterator.
+    fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
+        for v in iter {
+            self.insert(v);
+        }
+    }
+}
+
+impl<T: PartialOrd> IntoIterator for BinaryTree<T> {
+    type Item = T;
+
+    type IntoIter = IntoIter<T>;
+
+    /// Returns a consuming iterator over the `BinaryTree`.
+    ///
+    /// The iterator yields all items in the tree using the **preorder tree traversal techinque**.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let tree = BinaryTree::from(vec![5, 4, 6]);
+    /// let mut tree_iter = tree.into_iter();
+    ///
+    /// assert_eq!(tree_iter.next(), Some(5));
+    /// assert_eq!(tree_iter.next(), Some(4));
+    /// assert_eq!(tree_iter.next(), Some(6));
+    ///
+    /// // the iterator is now empty
+    /// assert_eq!(tree_iter.next(), None);
+    /// ```
+    #[must_use = "iterators are evaluated lazily"]
+    fn into_iter(self) -> Self::IntoIter {
+        let mut values = Vec::with_capacity(self.count);
+        let mut queue = VecDeque::new();
+
+        if let Some(root) = self.root {
+            queue.push_front(root);
+
+            while let Some(node) = queue.pop_front() {
+                values.push(node.value);
+
+                if let Some(right) = node.right {
+                    queue.push_front(right);
+                }
+
+                if let Some(left) = node.left {
+                    queue.push_front(left);
+                }
+            }
+        }
+
+        IntoIter {
+            vec: values.into_iter(),
+        }
+    }
+}
+
+/// An iterator that moves out of the `BinaryTree`.
+///
+/// This `struct` is created by the `into_iter` method on [`BinaryTree`] (provided by the [`IntoIterator`] trait).
+pub struct IntoIter<T> {
+    vec: std::vec::IntoIter<T>,
+}
+
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+
+    #[inline]
+    fn next(&mut self) -> Option<Self::Item> {
+        self.vec.next()
+    }
+}
+
+impl<'a, T: PartialOrd> IntoIterator for &'a BinaryTree<T> {
+    type Item = &'a T;
+
+    type IntoIter = Iter<'a, T>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        let mut values = Vec::with_capacity(self.count);
+        let mut queue = VecDeque::new();
+
+        if let Some(root) = &self.root {
+            queue.push_front(root);
+
+            while let Some(node) = queue.pop_front() {
+                values.push(&node.value);
+
+                if let Some(right) = &node.right {
+                    queue.push_front(right);
+                }
+
+                if let Some(left) = &node.left {
+                    queue.push_front(left);
+                }
+            }
+        }
+
+        Iter {
+            vec: values,
+            index: 0,
+        }
+    }
+}
+
+/// An iterator that borrows from the `BinaryTree`.
+///
+/// This `struct` is created by the `iter` method on [`BinaryTree`].
+pub struct Iter<'a, T> {
+    vec: Vec<&'a T>,
+    index: usize,
+}
+
+impl<'a, T> Iterator for Iter<'a, T> {
+    type Item = &'a T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let val = match self.vec.get(self.index) {
+            Some(_) => Some(self.vec[self.index]),
+            None => None,
+        };
+        self.index += 1;
+
+        val
+    }
+}
+
+#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
+struct Node<T> {
+    value: T,
+    left: Option<Box<Node<T>>>,
+    right: Option<Box<Node<T>>>,
+}
+
+impl<T: PartialOrd> Node<T> {
+    /// Constructs a new empty `Node<T>`.
+    ///
+    /// An node has no left or right child.
     pub fn new(value: T) -> Self {
         Self {
             value,
@@ -227,194 +430,201 @@ impl<T: PartialOrd> Item<T> {
         }
     }
 
-    /// Returns a reference to the value of the item.
+    /// Returns a reference to the value of the node.
+    #[inline]
     pub fn value(&self) -> &T {
         &self.value
     }
 
-    /// Returns an `Option` containing a reference to the left child of the item.
+    /// Returns an `Option` containing a reference to the left child of the node.
+    #[inline]
     pub fn left(&self) -> Option<&Self> {
         self.left.as_deref()
     }
 
-    /// Returns an `Option` containing a reference to the right child of the item.
+    /// Returns an `Option` containing a reference to the right child of the node.
+    #[inline]
     pub fn right(&self) -> Option<&Self> {
         self.right.as_deref()
     }
 
-    /// Returns an `Option` containing a mutable reference to the left child of the item.
+    /// Returns an `Option` containing a mutable reference to the left child of the node.
+    #[inline]
     pub fn left_mut(&mut self) -> Option<&mut Self> {
         self.left.as_deref_mut()
     }
 
-    /// Returns an `Option` containing a mutable reference to the right child of the item.
+    /// Returns an `Option` containing a mutable reference to the right child of the node.
+    #[inline]
     pub fn right_mut(&mut self) -> Option<&mut Self> {
         self.right.as_deref_mut()
     }
 
-    /// Creates a new `Item` from the provided value, and set it as the left child of `self`.
+    /// Creates a new `Node` from the provided value, and set it as the left child of `self`.
+    #[inline]
     pub fn set_left(&mut self, value: T) {
-        self.left = Some(Box::new(Item::new(value)))
+        self.left = Some(Box::new(Node::new(value)));
     }
 
-    /// Creates a new `Item` from the provided value, and set it as the right child of `self`.
+    /// Creates a new `Node` from the provided value, and set it as the right child of `self`.
+    #[inline]
     pub fn set_right(&mut self, value: T) {
-        self.right = Some(Box::new(Item::new(value)))
+        self.right = Some(Box::new(Node::new(value)));
     }
 }
 
 #[cfg(test)]
-mod item {
-    use super::Item;
+mod node {
+    use super::Node;
 
     #[test]
     fn gets_the_value() {
-        let item = Item {
+        let node = Node {
             value: 5,
             left: None,
             right: None,
         };
-        assert_eq!(item.value(), &5);
+        assert_eq!(node.value(), &5);
     }
 
     #[test]
     fn gets_left_child_that_is_none() {
-        let item = Item {
+        let node = Node {
             value: 0,
             left: None,
             right: None,
         };
         let expected = None;
 
-        assert_eq!(item.left(), expected);
+        assert_eq!(node.left(), expected);
     }
 
     #[test]
     fn gets_left_child_that_is_some() {
-        let item = Item {
+        let node = Node {
             value: 0,
-            left: Some(Box::new(Item {
+            left: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
             })),
             right: None,
         };
-        let expected = Some(&Item {
+        let expected = Some(&Node {
             value: 5,
             left: None,
             right: None,
         });
 
-        assert_eq!(item.left(), expected);
+        assert_eq!(node.left(), expected);
     }
 
     #[test]
     fn gets_right_child_that_is_none() {
-        let item = Item {
+        let node = Node {
             value: 0,
             left: None,
             right: None,
         };
         let expected = None;
 
-        assert_eq!(item.right(), expected);
+        assert_eq!(node.right(), expected);
     }
 
     #[test]
     fn gets_right_child_that_is_some() {
-        let item = Item {
+        let node = Node {
             value: 0,
             left: None,
-            right: Some(Box::new(Item {
+            right: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
             })),
         };
-        let expected = Some(&Item {
+        let expected = Some(&Node {
             value: 5,
             left: None,
             right: None,
         });
 
-        assert_eq!(item.right(), expected);
+        assert_eq!(node.right(), expected);
     }
 
     #[test]
     fn gets_mut_left_child_that_is_none() {
-        let mut item = Item {
+        let mut node = Node {
             value: 0,
             left: None,
             right: None,
         };
         let expected = None;
 
-        assert_eq!(item.left_mut(), expected);
+        assert_eq!(node.left_mut(), expected);
     }
 
     #[test]
     fn gets_mut_left_child_that_is_some() {
-        let mut item = Item {
+        let mut node = Node {
             value: 0,
-            left: Some(Box::new(Item {
+            left: Some(Box::new(Node {
                 value: -1,
                 left: None,
                 right: None,
             })),
             right: None,
         };
-        let mut expected = Item {
+        let mut expected = Node {
             value: -1,
             left: None,
             right: None,
         };
 
-        assert_eq!(item.left_mut(), Some(&mut expected));
+        assert_eq!(node.left_mut(), Some(&mut expected));
     }
 
     #[test]
     fn gets_mut_right_child_that_is_none() {
-        let mut item = Item {
+        let mut node = Node {
             value: 0,
             left: None,
             right: None,
         };
         let expected = None;
 
-        assert_eq!(item.right_mut(), expected);
+        assert_eq!(node.right_mut(), expected);
     }
 
     #[test]
     fn gets_mut_right_child_that_is_some() {
-        let mut item = Item {
+        let mut node = Node {
             value: 0,
             left: None,
-            right: Some(Box::new(Item {
+            right: Some(Box::new(Node {
                 value: 1,
                 left: None,
                 right: None,
             })),
         };
-        let mut expected = Item {
+        let mut expected = Node {
             value: 1,
             left: None,
             right: None,
         };
 
-        assert_eq!(item.right_mut(), Some(&mut expected));
+        assert_eq!(node.right_mut(), Some(&mut expected));
     }
 
     #[test]
     fn sets_left() {
-        let mut item = Item {
+        let mut node = Node {
             value: 0,
             left: None,
             right: None,
         };
-        let expected = Item {
+        let expected = Node {
             value: 0,
-            left: Some(Box::new(Item {
+            left: Some(Box::new(Node {
                 value: -1,
                 left: None,
                 right: None,
@@ -422,35 +632,35 @@ mod item {
             right: None,
         };
 
-        item.set_left(-1);
-        assert_eq!(item, expected);
+        node.set_left(-1);
+        assert_eq!(node, expected);
     }
 
     #[test]
     fn sets_right() {
-        let mut item = Item {
+        let mut node = Node {
             value: 0,
             left: None,
             right: None,
         };
-        let expected = Item {
+        let expected = Node {
             value: 0,
             left: None,
-            right: Some(Box::new(Item {
+            right: Some(Box::new(Node {
                 value: 1,
                 left: None,
                 right: None,
             })),
         };
 
-        item.set_right(1);
-        assert_eq!(item, expected);
+        node.set_right(1);
+        assert_eq!(node, expected);
     }
 }
 
 #[cfg(test)]
-mod binary_tree_getters {
-    use super::{BinaryTree, Item};
+mod getters {
+    use super::{BinaryTree, Node};
 
     #[test]
     fn count() {
@@ -477,7 +687,7 @@ mod binary_tree_getters {
     #[test]
     fn is_empty() {
         let tree = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
@@ -498,7 +708,7 @@ mod binary_tree_getters {
     #[test]
     fn clear() {
         let mut tree = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
@@ -522,7 +732,7 @@ mod binary_tree_getters {
     #[test]
     fn root() {
         let tree = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
@@ -542,14 +752,14 @@ mod binary_tree_getters {
 }
 
 #[cfg(test)]
-mod binary_tree_insert {
-    use super::{BinaryTree, Item};
+mod insert {
+    use super::{BinaryTree, Node};
 
     #[test]
     fn insert_one_element_that_becomes_root() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
@@ -565,9 +775,9 @@ mod binary_tree_insert {
     fn inserts_two_elements_second_is_left_child() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 4,
                     left: None,
                     right: None,
@@ -586,10 +796,10 @@ mod binary_tree_insert {
     fn inserts_two_elements_second_is_right_child() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
                 left: None,
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 6,
                     left: None,
                     right: None,
@@ -607,7 +817,7 @@ mod binary_tree_insert {
     fn discards_duplicate_inserts_of_root() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 5,
                 left: None,
                 right: None,
@@ -624,13 +834,13 @@ mod binary_tree_insert {
     fn inserts_three_elements_second_and_third_are_right_children() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 1,
                 left: None,
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 2,
                     left: None,
-                    right: Some(Box::new(Item {
+                    right: Some(Box::new(Node {
                         value: 3,
                         left: None,
                         right: None,
@@ -650,13 +860,13 @@ mod binary_tree_insert {
     fn discards_duplicates_of_right_children() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 1,
                 left: None,
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 2,
                     left: None,
-                    right: Some(Box::new(Item {
+                    right: Some(Box::new(Node {
                         value: 3,
                         left: None,
                         right: None,
@@ -679,11 +889,11 @@ mod binary_tree_insert {
     fn inserts_three_elements_second_and_third_are_left_children() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 3,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 2,
-                    left: Some(Box::new(Item {
+                    left: Some(Box::new(Node {
                         value: 1,
                         left: None,
                         right: None,
@@ -705,11 +915,11 @@ mod binary_tree_insert {
     fn discards_duplicates_of_left_children() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 3,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 2,
-                    left: Some(Box::new(Item {
+                    left: Some(Box::new(Node {
                         value: 1,
                         left: None,
                         right: None,
@@ -734,14 +944,14 @@ mod binary_tree_insert {
     fn inserts_four_elements_zig_zag_starting_left() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 10,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 0,
                     left: None,
-                    right: Some(Box::new(Item {
+                    right: Some(Box::new(Node {
                         value: 5,
-                        left: Some(Box::new(Item {
+                        left: Some(Box::new(Node {
                             value: 3,
                             left: None,
                             right: None,
@@ -765,15 +975,15 @@ mod binary_tree_insert {
     fn inserts_four_elements_zig_zag_starting_right() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 0,
                 left: None,
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 10,
-                    left: Some(Box::new(Item {
+                    left: Some(Box::new(Node {
                         value: 3,
                         left: None,
-                        right: Some(Box::new(Item {
+                        right: Some(Box::new(Node {
                             value: 5,
                             left: None,
                             right: None,
@@ -797,14 +1007,14 @@ mod binary_tree_insert {
         let mut tree1 = BinaryTree::new();
         let mut tree2 = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 2,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 1,
                     left: None,
                     right: None,
                 })),
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 3,
                     left: None,
                     right: None,
@@ -832,29 +1042,29 @@ mod binary_tree_insert {
     fn creates_three_layer_tree_one_layer_at_a_time() {
         let mut tree = BinaryTree::new();
         let expected = BinaryTree {
-            root: Some(Box::new(Item {
+            root: Some(Box::new(Node {
                 value: 50,
-                left: Some(Box::new(Item {
+                left: Some(Box::new(Node {
                     value: 25,
-                    left: Some(Box::new(Item {
+                    left: Some(Box::new(Node {
                         value: 13,
                         left: None,
                         right: None,
                     })),
-                    right: Some(Box::new(Item {
+                    right: Some(Box::new(Node {
                         value: 37,
                         left: None,
                         right: None,
                     })),
                 })),
-                right: Some(Box::new(Item {
+                right: Some(Box::new(Node {
                     value: 75,
-                    left: Some(Box::new(Item {
+                    left: Some(Box::new(Node {
                         value: 63,
                         left: None,
                         right: None,
                     })),
-                    right: Some(Box::new(Item {
+                    right: Some(Box::new(Node {
                         value: 87,
                         left: None,
                         right: None,
@@ -889,5 +1099,291 @@ mod binary_tree_insert {
         let mut tree = BinaryTree::new();
         tree.insert(2.0);
         tree.insert(f64::NAN);
+    }
+
+    #[test]
+    fn inserts_unevenly_and_ensures_correct_height() {
+        let mut tree = BinaryTree::new();
+        let expected = 3;
+
+        tree.insert(2);
+        tree.insert(1);
+        tree.insert(0);
+        tree.insert(3);
+
+        assert_eq!(tree.height(), expected);
+    }
+
+    #[test]
+    fn inserts_unevenly_and_ensures_correct_count() {
+        let mut tree = BinaryTree::new();
+        let expected = 4;
+
+        tree.insert(2);
+        tree.insert(1);
+        tree.insert(0);
+        tree.insert(3);
+
+        assert_eq!(tree.count(), expected);
+    }
+}
+
+#[cfg(test)]
+mod iterator_trait_impls {
+    use super::{BinaryTree, Node};
+
+    #[test]
+    fn creates_tree_from_vec() {
+        let values = vec![5, 4, 6];
+        let expected = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: Some(Box::new(Node {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Node {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
+
+        let tree = BinaryTree::from(values);
+        assert_eq!(tree, expected);
+    }
+
+    #[test]
+    #[should_panic]
+    fn panics_when_creating_from_vec_of_incomparable_elements() {
+        let values = vec![5.0, 4.0, 6.0, f64::NAN];
+        _ = BinaryTree::from(values);
+    }
+
+    #[test]
+    fn into_iter_from_small_tree() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: Some(Box::new(Node {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Node {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
+
+        let mut tree_iter = tree.into_iter();
+
+        assert_eq!(tree_iter.next(), Some(5));
+        assert_eq!(tree_iter.next(), Some(4));
+        assert_eq!(tree_iter.next(), Some(6));
+        assert_eq!(tree_iter.next(), None);
+    }
+
+    #[test]
+    fn into_iter_from_large_tree() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 50,
+                left: Some(Box::new(Node {
+                    value: 25,
+                    left: Some(Box::new(Node {
+                        value: 13,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 37,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+                right: Some(Box::new(Node {
+                    value: 75,
+                    left: Some(Box::new(Node {
+                        value: 63,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 87,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+            })),
+            count: 7,
+            height: 3,
+        };
+
+        let mut iter = tree.into_iter();
+
+        assert_eq!(iter.next(), Some(50));
+        assert_eq!(iter.next(), Some(25));
+        assert_eq!(iter.next(), Some(13));
+        assert_eq!(iter.next(), Some(37));
+        assert_eq!(iter.next(), Some(75));
+        assert_eq!(iter.next(), Some(63));
+        assert_eq!(iter.next(), Some(87));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn creates_tree_from_iterator() {
+        let tree = BinaryTree::from_iter(vec![5, 4, 6]);
+        let expected = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: Some(Box::new(Node {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Node {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
+
+        assert_eq!(tree, expected)
+    }
+
+    #[test]
+    fn iter_from_tree() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: Some(Box::new(Node {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Node {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
+
+        let mut iter = tree.iter();
+
+        assert_eq!(iter.next(), Some(&5));
+        assert_eq!(iter.next(), Some(&4));
+        assert_eq!(iter.next(), Some(&6));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn iter_from_large_tree() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 50,
+                left: Some(Box::new(Node {
+                    value: 25,
+                    left: Some(Box::new(Node {
+                        value: 13,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 37,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+                right: Some(Box::new(Node {
+                    value: 75,
+                    left: Some(Box::new(Node {
+                        value: 63,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 87,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+            })),
+            count: 7,
+            height: 3,
+        };
+
+        let mut iter = tree.iter();
+
+        assert_eq!(iter.next(), Some(&50));
+        assert_eq!(iter.next(), Some(&25));
+        assert_eq!(iter.next(), Some(&13));
+        assert_eq!(iter.next(), Some(&37));
+        assert_eq!(iter.next(), Some(&75));
+        assert_eq!(iter.next(), Some(&63));
+        assert_eq!(iter.next(), Some(&87));
+        assert_eq!(iter.next(), None);
+    }
+}
+
+#[cfg(all(test, feature = "serde"))]
+mod json {
+    use super::{BinaryTree, Node};
+    use rstest::{fixture, rstest};
+
+    #[fixture]
+    fn json_tree() -> &'static str {
+        r#"{"root":{"value":5,"left":{"value":4,"left":null,"right":null},"right":{"value":6,"left":null,"right":null}},"count":3,"height":2}"#
+    }
+
+    #[rstest]
+    fn deserializes_tree_from_json(json_tree: &'static str) {
+        let tree: BinaryTree<i32> =
+            serde_json::from_str(json_tree).expect("should parse json into tree");
+        let expected = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: Some(Box::new(Node {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Node {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
+
+        assert_eq!(tree, expected);
+    }
+
+    #[rstest]
+    fn serialize_tree_into_json(json_tree: &'static str) {
+        let mut tree = BinaryTree::new();
+        tree.insert(5);
+        tree.insert(4);
+        tree.insert(6);
+        let actual = serde_json::to_string(&tree).expect("should parse tree into json");
+
+        assert_eq!(actual, json_tree);
     }
 }

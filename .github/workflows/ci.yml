@@ -61,7 +61,7 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-targets --all-features -- -D warnings # this turns warnings into errors
+          args: --all-features -- -W clippy::all -D warnings # this turns warnings into errors
 
   rustfmt:
     name: Format

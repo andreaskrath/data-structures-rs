@@ -1339,6 +1339,64 @@ mod iterator_trait_impls {
         assert_eq!(iter.next(), Some(&87));
         assert_eq!(iter.next(), None);
     }
+
+    #[test]
+    fn extends_collection_with_iterator() {
+        let mut tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 50,
+                left: Some(Box::new(Node {
+                    value: 25,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Node {
+                    value: 75,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
+        let expected = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 50,
+                left: Some(Box::new(Node {
+                    value: 25,
+                    left: Some(Box::new(Node {
+                        value: 13,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 37,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+                right: Some(Box::new(Node {
+                    value: 75,
+                    left: Some(Box::new(Node {
+                        value: 63,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 87,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+            })),
+            count: 7,
+            height: 3,
+        };
+
+        tree.extend([13, 37, 63, 87]);
+
+        assert_eq!(tree, expected);
+    }
 }
 
 #[cfg(all(test, feature = "serde"))]

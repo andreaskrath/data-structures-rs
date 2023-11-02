@@ -1,3 +1,5 @@
+# TO USE ANY OF THE FOLLOWING COMMANDS, YOU MUST INSTALL THE just PROGRAM.
+
 # build a debug solution with all features
 build:
     cargo build --all-features

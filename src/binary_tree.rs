@@ -265,6 +265,35 @@ impl<T: PartialOrd> BinaryTree<T> {
             None
         }
     }
+
+    /// Returns the largest element in the `BinaryTree`.
+    ///
+    /// # Time Complexity
+    ///
+    /// The implementation uses the properties of a binary tree to efficiently
+    /// find and return the largest element, meaning for a balanced tree this
+    /// will be near `log(n)`, which is likely to be faster than an iterator.
+    ///
+    /// However, an unbalanced tree will be closer to linear time.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let tree = BinaryTree::from(vec![8, 4, 6, 16, -5, 25]);
+    /// assert_eq!(tree.max(), Some(&25));
+    /// ```
+    pub fn max(&self) -> Option<&T> {
+        if let Some(mut node) = self.root.as_deref() {
+            loop {
+                match (node.left(), node.right()) {
+                    (None, None) | (Some(_), None) => return Some(node.value()),
+                    (None, Some(right)) | (Some(_), Some(right)) => node = right,
+                }
+            }
+        } else {
+            None
+        }
+    }
 }
 
 impl<T: PartialOrd> From<Vec<T>> for BinaryTree<T> {
@@ -1339,6 +1368,191 @@ mod min {
         };
 
         assert_eq!(tree.min(), Some(&13));
+    }
+}
+
+#[cfg(test)]
+mod max {
+    use super::{BinaryTree, Node};
+
+    #[test]
+    fn empty_tree_returns_none() {
+        let tree: BinaryTree<i32> = BinaryTree {
+            root: None,
+            count: 0,
+            height: 0,
+        };
+
+        assert_eq!(tree.max(), None);
+    }
+
+    #[test]
+    fn tree_with_only_root_returns_root() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: None,
+                right: None,
+            })),
+            count: 0,
+            height: 0,
+        };
+
+        assert_eq!(tree.max(), Some(&5));
+    }
+
+    #[test]
+    fn tree_with_root_and_right_child_returns_right() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: None,
+                right: Some(Box::new(Node {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 0,
+            height: 0,
+        };
+
+        assert_eq!(tree.max(), Some(&6));
+    }
+
+    #[test]
+    fn tree_with_root_and_left_child_returns_root() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: Some(Box::new(Node {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: None,
+            })),
+            count: 0,
+            height: 0,
+        };
+
+        assert_eq!(tree.max(), Some(&5));
+    }
+
+    #[test]
+    fn tree_with_root_and_both_childen_returns_right() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: Some(Box::new(Node {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Node {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 0,
+            height: 0,
+        };
+
+        assert_eq!(tree.max(), Some(&6));
+    }
+
+    #[test]
+    fn tree_with_root_and_multiple_right_returns_right_most_child() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: None,
+                right: Some(Box::new(Node {
+                    value: 6,
+                    left: None,
+                    right: Some(Box::new(Node {
+                        value: 7,
+                        left: None,
+                        right: Some(Box::new(Node {
+                            value: 8,
+                            left: None,
+                            right: None,
+                        })),
+                    })),
+                })),
+            })),
+            count: 0,
+            height: 0,
+        };
+
+        assert_eq!(tree.max(), Some(&8));
+    }
+
+    #[test]
+    fn tree_with_root_and_multiple_left_returns_root() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: Some(Box::new(Node {
+                    value: 4,
+                    left: Some(Box::new(Node {
+                        value: 3,
+                        left: Some(Box::new(Node {
+                            value: 2,
+                            left: None,
+                            right: None,
+                        })),
+                        right: None,
+                    })),
+                    right: None,
+                })),
+                right: None,
+            })),
+            count: 0,
+            height: 0,
+        };
+
+        assert_eq!(tree.max(), Some(&5));
+    }
+
+    #[test]
+    fn balanced_tree_returns_right_most_child() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 50,
+                left: Some(Box::new(Node {
+                    value: 25,
+                    left: Some(Box::new(Node {
+                        value: 13,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 37,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+                right: Some(Box::new(Node {
+                    value: 75,
+                    left: Some(Box::new(Node {
+                        value: 63,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 87,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+            })),
+            count: 7,
+            height: 3,
+        };
+
+        assert_eq!(tree.max(), Some(&87));
     }
 }
 

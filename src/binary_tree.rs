@@ -1864,10 +1864,23 @@ mod json {
 
     #[rstest]
     fn serialize_tree_into_json(json_tree: &'static str) {
-        let mut tree = BinaryTree::new();
-        tree.insert(5);
-        tree.insert(4);
-        tree.insert(6);
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: Some(Box::new(Node {
+                    value: 4,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Node {
+                    value: 6,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+            height: 2,
+        };
         let actual = serde_json::to_string(&tree).expect("should parse tree into json");
 
         assert_eq!(actual, json_tree);

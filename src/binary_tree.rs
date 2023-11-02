@@ -257,8 +257,8 @@ impl<T: PartialOrd> BinaryTree<T> {
         if let Some(mut node) = self.root.as_deref() {
             loop {
                 match (node.left(), node.right()) {
-                    (None, None) | (None, Some(_)) => return Some(node.value()),
-                    (Some(left), None) | (Some(left), Some(_)) => node = left,
+                    (None, None | Some(_)) => return Some(node.value()),
+                    (Some(left), None | Some(_)) => node = left,
                 }
             }
         } else {
@@ -286,8 +286,8 @@ impl<T: PartialOrd> BinaryTree<T> {
         if let Some(mut node) = self.root.as_deref() {
             loop {
                 match (node.left(), node.right()) {
-                    (None, None) | (Some(_), None) => return Some(node.value()),
-                    (None, Some(right)) | (Some(_), Some(right)) => node = right,
+                    (None | Some(_), None) => return Some(node.value()),
+                    (None | Some(_), Some(right)) => node = right,
                 }
             }
         } else {

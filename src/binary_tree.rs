@@ -306,6 +306,13 @@ impl<T: PartialOrd> BinaryTree<T> {
     ///
     /// However, an unbalanced tree will be closer to linear time.
     ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let tree = BinaryTree::from(vec![8, 4, 6, 16, -5, 25]);
+    /// assert!(tree.contains(&8));
+    /// assert!(!tree.contains(&5));
+    /// ```
     pub fn contains(&self, target: &T) -> bool {
         use std::cmp::Ordering as O;
 

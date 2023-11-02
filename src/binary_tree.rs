@@ -294,6 +294,45 @@ impl<T: PartialOrd> BinaryTree<T> {
             None
         }
     }
+
+    /// Returns `true` if the `BinaryTree` contains an element with the given value.
+    ///
+    /// # Time Complexity
+    ///
+    /// This implementation uses the properties of a binary tree to efficiently
+    /// find the element with the given value, provided that it exists in the tree.
+    ///
+    /// As a result, a balanced tree will be near `log(n)`, which is likely to be faster than an iterator.
+    ///
+    /// However, an unbalanced tree will be closer to linear time.
+    ///
+    pub fn contains(&self, target: &T) -> bool {
+        use std::cmp::Ordering as O;
+
+        if let Some(mut node) = self.root.as_deref() {
+            loop {
+                match target.partial_cmp(node.value()).unwrap() {
+                    O::Equal => return true,
+                    O::Less => {
+                        if let Some(left) = node.left() {
+                            node = left;
+                        } else {
+                            break;
+                        }
+                    }
+                    O::Greater => {
+                        if let Some(right) = node.right() {
+                            node = right;
+                        } else {
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        false
+    }
 }
 
 impl<T: PartialOrd> From<Vec<T>> for BinaryTree<T> {
@@ -1553,6 +1592,106 @@ mod max {
         };
 
         assert_eq!(tree.max(), Some(&87));
+    }
+}
+
+#[cfg(test)]
+mod contains {
+    use super::{BinaryTree, Node};
+
+    #[test]
+    fn empty_tree_returns_false() {
+        let tree: BinaryTree<i32> = BinaryTree {
+            root: None,
+            count: 0,
+            height: 0,
+        };
+
+        assert!(!tree.contains(&0));
+    }
+
+    #[test]
+    fn root_is_target_returns_true() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 0,
+                left: None,
+                right: None,
+            })),
+            count: 0,
+            height: 0,
+        };
+
+        assert!(tree.contains(&0));
+    }
+
+    #[test]
+    fn root_is_not_target_returns_false() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 0,
+                left: None,
+                right: None,
+            })),
+            count: 0,
+            height: 0,
+        };
+
+        assert!(!tree.contains(&1));
+    }
+
+    #[test]
+    fn left_most_is_target_returns_true() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: Some(Box::new(Node {
+                    value: 4,
+                    left: Some(Box::new(Node {
+                        value: 3,
+                        left: Some(Box::new(Node {
+                            value: 2,
+                            left: None,
+                            right: None,
+                        })),
+                        right: None,
+                    })),
+                    right: None,
+                })),
+                right: None,
+            })),
+            count: 0,
+            height: 0,
+        };
+
+        assert!(tree.contains(&2));
+    }
+
+    #[test]
+    fn right_most_is_target_returns_true() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: None,
+                right: Some(Box::new(Node {
+                    value: 6,
+                    left: None,
+                    right: Some(Box::new(Node {
+                        value: 7,
+                        left: None,
+                        right: Some(Box::new(Node {
+                            value: 8,
+                            left: None,
+                            right: None,
+                        })),
+                    })),
+                })),
+            })),
+            count: 0,
+            height: 0,
+        };
+
+        assert!(tree.contains(&8));
     }
 }
 

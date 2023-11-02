@@ -297,6 +297,9 @@ impl<T: PartialOrd> BinaryTree<T> {
 
     /// Returns `true` if the `BinaryTree` contains an element with the given value.
     ///
+    /// # Panics
+    /// The function will panic if a comparison of elements is impossible with the [`PartialOrd`] trait.
+    ///
     /// # Time Complexity
     ///
     /// This implementation uses the properties of a binary tree to efficiently

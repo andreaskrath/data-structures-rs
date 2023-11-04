@@ -93,18 +93,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
-      - uses: actions/checkout@v3
+        uses: actions/checkout@v3
       - name: Install nightly toolchain as its required for code coverage to work
-      - uses: actions-rs/toolchain@v1
+        uses: actions-rs/toolchain@v1
         with:
           toolchain: nightly
           override: true
       - name: Cleans build artifacts from earlier builds
-      - uses: actions-rs/cargo@v1
+        uses: actions-rs/cargo@v1
         with: 
           command: clean
       - name: Runs test suite
-      - uses: actions-rs/cargo@v1
+        uses: actions-rs/cargo@v1
         with:
           command: test
           args: --all-features --no-fail-fast

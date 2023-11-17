@@ -1,9 +1,9 @@
 use std::collections::VecDeque;
 
-#[cfg(feature = "serde")]
+#[cfg(feature = "json")]
 use serde::{Deserialize, Serialize};
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "json", derive(Serialize, Deserialize))]
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
 pub struct BinaryTree<T>
 where
@@ -519,7 +519,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
     }
 }
 
-#[cfg_attr(feature = "serde", derive(Serialize, Deserialize))]
+#[cfg_attr(feature = "json", derive(Serialize, Deserialize))]
 #[derive(Debug, Default, Clone, PartialEq, Eq, Hash)]
 struct Node<T> {
     value: T,
@@ -1978,7 +1978,7 @@ mod iterator_trait_impls {
     }
 }
 
-#[cfg(all(test, feature = "serde"))]
+#[cfg(all(test, feature = "json"))]
 mod json {
     use super::{BinaryTree, Node};
     use rstest::{fixture, rstest};

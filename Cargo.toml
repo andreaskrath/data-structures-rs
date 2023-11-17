@@ -19,6 +19,11 @@ rand = "0.8.5"
 default = []
 json = [ "dep:serde" ]
 
+[lints.rust]
+unsafe_code = "forbid"
+
+[lints.clippy]
+indexing_slicing = "deny"
 [[bench]]
 name = "binary_tree"
 harness = false

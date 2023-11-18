@@ -507,11 +507,12 @@ impl<'a, T> Iterator for Iter<'a, T> {
     type Item = &'a T;
 
     fn next(&mut self) -> Option<Self::Item> {
-        // indexing is allowed because of bound check
-        let val = match self.index < self.vec.len() {
+        let val = if self.index < self.vec.len() {
+            // indexing is allowed because of bound check
             #[allow(clippy::indexing_slicing)]
-            true => Some(self.vec[self.index]),
-            false => None,
+            Some(self.vec[self.index])
+        } else {
+            None
         };
         self.index += 1;
 

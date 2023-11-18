@@ -173,7 +173,7 @@ impl<T: PartialOrd> BinaryTree<T> {
         self.height
     }
 
-    /// Returns the value contained within the root element.
+    /// Returns a reference to the value contained within the root element.
     ///
     /// # Examples
     /// ```

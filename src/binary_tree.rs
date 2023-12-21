@@ -291,8 +291,6 @@ where
                 level += 1;
             }
         } else {
-            // This ensures that root is not an imcomparable value.
-            _ = value.partial_cmp(&value).unwrap();
 
             self.root = Some(Box::new(Node::new(value)));
             self.count = 1;

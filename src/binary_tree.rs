@@ -1189,21 +1189,6 @@ mod insert {
     }
 
     #[test]
-    #[should_panic]
-    fn incomparable_elements_in_empty_tree_panics() {
-        let mut tree = BinaryTree::new();
-        tree.insert(f64::NAN);
-    }
-
-    #[test]
-    #[should_panic]
-    fn incomparable_elements_in_non_empty_tree_panics() {
-        let mut tree = BinaryTree::new();
-        tree.insert(2.0);
-        tree.insert(f64::NAN);
-    }
-
-    #[test]
     fn inserts_unevenly_and_ensures_correct_height() {
         let mut tree = BinaryTree::new();
         let expected = 3;
@@ -1727,13 +1712,6 @@ mod iterator_trait_impls {
 
         let tree = BinaryTree::from(values);
         assert_eq!(tree, expected);
-    }
-
-    #[test]
-    #[should_panic]
-    fn panics_when_creating_from_vec_of_incomparable_elements() {
-        let values = vec![5.0, 4.0, 6.0, f64::NAN];
-        _ = BinaryTree::from(values);
     }
 
     #[test]

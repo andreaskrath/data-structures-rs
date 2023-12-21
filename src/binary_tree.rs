@@ -221,16 +221,13 @@ impl<T> BinaryTree<T> {
 
 /// The methods in this implementation block require trait bounds to correctly apply the logic of the methods.
 ///
-/// The trait bound in question is [`PartialOrd`], which is used to compare elements in the tree.
+/// The trait bound in question is [`Ord`], which is used to compare elements in the tree.
 impl<T> BinaryTree<T>
 where
-    T: PartialOrd,
+    T: Ord,
 {
     /// Inserts the provided value into the `BinaryTree`,
     /// and preserves the properties of the binary tree.
-    ///
-    /// # Panics
-    /// The function will panic if a comparison of elements is impossible with the [`PartialOrd`] trait.
     ///
     /// # Examples
     /// ```
@@ -252,7 +249,7 @@ where
             loop {
                 match (root.left(), root.right()) {
                     (None, None) => {
-                        match value.partial_cmp(root.value()).unwrap() {
+                        match value.cmp(root.value()) {
                             Ord::Equal => return,
                             Ord::Less => root.set_left(value),
                             Ord::Greater => root.set_right(value),
@@ -261,7 +258,7 @@ where
                         self.count += 1;
                         return;
                     }
-                    (None, Some(_)) => match value.partial_cmp(root.value()).unwrap() {
+                    (None, Some(_)) => match value.cmp(root.value()) {
                         Ord::Equal => return,
                         Ord::Less => {
                             root.set_left(value);
@@ -271,7 +268,7 @@ where
                         }
                         Ord::Greater => root = root.right_mut().unwrap(),
                     },
-                    (Some(_), None) => match value.partial_cmp(root.value()).unwrap() {
+                    (Some(_), None) => match value.cmp(root.value()) {
                         Ord::Equal => return,
                         Ord::Less => root = root.left_mut().unwrap(),
                         Ord::Greater => {
@@ -281,7 +278,7 @@ where
                             return;
                         }
                     },
-                    (Some(_), Some(_)) => match value.partial_cmp(root.value()).unwrap() {
+                    (Some(_), Some(_)) => match value.cmp(root.value()) {
                         Ord::Equal => return,
                         Ord::Less => root = root.left_mut().unwrap(),
                         Ord::Greater => root = root.right_mut().unwrap(),
@@ -291,9 +288,6 @@ where
                 level += 1;
             }
         } else {
-            // This ensures that root is not an imcomparable value.
-            _ = value.partial_cmp(&value).unwrap();
-
             self.root = Some(Box::new(Node::new(value)));
             self.count = 1;
             self.height = 1;
@@ -301,9 +295,6 @@ where
     }
 
     /// Returns `true` if the `BinaryTree` contains an element with the given value.
-    ///
-    /// # Panics
-    /// The function will panic if a comparison of elements is impossible with the [`PartialOrd`] trait.
     ///
     /// # Time Complexity
     ///
@@ -322,20 +313,20 @@ where
     /// assert!(!tree.contains(&5));
     /// ```
     pub fn contains(&self, target: &T) -> bool {
-        use std::cmp::Ordering as O;
+        use std::cmp::Ordering as Ord;
 
         if let Some(mut node) = self.root.as_deref() {
             loop {
-                match target.partial_cmp(node.value()).unwrap() {
-                    O::Equal => return true,
-                    O::Less => {
+                match target.cmp(node.value()) {
+                    Ord::Equal => return true,
+                    Ord::Less => {
                         if let Some(left) = node.left() {
                             node = left;
                         } else {
                             break;
                         }
                     }
-                    O::Greater => {
+                    Ord::Greater => {
                         if let Some(right) = node.right() {
                             node = right;
                         } else {
@@ -350,11 +341,8 @@ where
     }
 }
 
-impl<T: PartialOrd> From<Vec<T>> for BinaryTree<T> {
+impl<T: Ord> From<Vec<T>> for BinaryTree<T> {
     /// Creates a `BinaryTree<T>` from `Vec<T>`.
-    ///
-    /// # Panic
-    /// The function will panic if a comparison of elements is impossible with the [`PartialOrd`] trait.
     fn from(vec: Vec<T>) -> Self {
         let mut tree = BinaryTree::new();
         for v in vec {
@@ -381,7 +369,7 @@ impl<T> AsMut<BinaryTree<T>> for BinaryTree<T> {
     }
 }
 
-impl<T: PartialOrd> FromIterator<T> for BinaryTree<T> {
+impl<T: Ord> FromIterator<T> for BinaryTree<T> {
     /// Constructs a `BinaryTree<T>` from an iterator for `T`.
     fn from_iter<I: IntoIterator<Item = T>>(iter: I) -> Self {
         let mut tree = BinaryTree::new();
@@ -394,7 +382,7 @@ impl<T: PartialOrd> FromIterator<T> for BinaryTree<T> {
     }
 }
 
-impl<T: PartialOrd> Extend<T> for BinaryTree<T> {
+impl<T: Ord> Extend<T> for BinaryTree<T> {
     /// Extends the `BinaryTree` with the contents of the provided iterator.
     fn extend<I: IntoIterator<Item = T>>(&mut self, iter: I) {
         for v in iter {
@@ -1201,21 +1189,6 @@ mod insert {
     }
 
     #[test]
-    #[should_panic]
-    fn incomparable_elements_in_empty_tree_panics() {
-        let mut tree = BinaryTree::new();
-        tree.insert(f64::NAN);
-    }
-
-    #[test]
-    #[should_panic]
-    fn incomparable_elements_in_non_empty_tree_panics() {
-        let mut tree = BinaryTree::new();
-        tree.insert(2.0);
-        tree.insert(f64::NAN);
-    }
-
-    #[test]
     fn inserts_unevenly_and_ensures_correct_height() {
         let mut tree = BinaryTree::new();
         let expected = 3;
@@ -1739,13 +1712,6 @@ mod iterator_trait_impls {
 
         let tree = BinaryTree::from(values);
         assert_eq!(tree, expected);
-    }
-
-    #[test]
-    #[should_panic]
-    fn panics_when_creating_from_vec_of_incomparable_elements() {
-        let values = vec![5.0, 4.0, 6.0, f64::NAN];
-        _ = BinaryTree::from(values);
     }
 
     #[test]

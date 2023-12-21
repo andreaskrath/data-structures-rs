@@ -5,16 +5,13 @@ use serde::{Deserialize, Serialize};
 
 #[cfg_attr(feature = "json", derive(Serialize, Deserialize))]
 #[derive(Default, Debug, Clone, PartialEq, Eq, Hash)]
-pub struct BinaryTree<T>
-where
-    T: PartialOrd,
-{
+pub struct BinaryTree<T> {
     root: Option<Box<Node<T>>>,
     count: usize,
     height: usize,
 }
 
-impl<T: PartialOrd> BinaryTree<T> {
+impl<T> BinaryTree<T> {
     /// Constructs a new empty `BinaryTree<T>`.
     ///
     /// # Examples
@@ -31,80 +28,6 @@ impl<T: PartialOrd> BinaryTree<T> {
             root: None,
             count: 0,
             height: 0,
-        }
-    }
-
-    /// Inserts the provided value into the `BinaryTree`,
-    /// and preserves the properties of the binary tree.
-    ///
-    /// # Panics
-    /// The function will panic if a comparison of elements is impossible with the [`PartialOrd`] trait.
-    ///
-    /// # Examples
-    /// ```
-    /// # use ds_rs::binary_tree::BinaryTree;
-    /// let mut tree = BinaryTree::new();
-    /// tree.insert(5);
-    /// assert_eq!(tree.root(), Some(&5));
-    /// assert_eq!(tree.height(), 1);
-    /// assert_eq!(tree.count(), 1);
-    /// ```
-    pub fn insert(&mut self, value: T) {
-        use std::cmp::Ordering as Ord;
-
-        if let Some(mut root) = self.root.as_deref_mut() {
-            // An empty tree is height 0, while a tree with only a root is height 1
-            // meaning this arm, which is entered when root is not empty
-            // automatically starts at level 2 in terms of height.
-            let mut level: usize = 2;
-            loop {
-                match (root.left(), root.right()) {
-                    (None, None) => {
-                        match value.partial_cmp(root.value()).unwrap() {
-                            Ord::Equal => return,
-                            Ord::Less => root.set_left(value),
-                            Ord::Greater => root.set_right(value),
-                        }
-                        self.height = self.height.max(level);
-                        self.count += 1;
-                        return;
-                    }
-                    (None, Some(_)) => match value.partial_cmp(root.value()).unwrap() {
-                        Ord::Equal => return,
-                        Ord::Less => {
-                            root.set_left(value);
-                            self.height = self.height.max(level);
-                            self.count += 1;
-                            return;
-                        }
-                        Ord::Greater => root = root.right_mut().unwrap(),
-                    },
-                    (Some(_), None) => match value.partial_cmp(root.value()).unwrap() {
-                        Ord::Equal => return,
-                        Ord::Less => root = root.left_mut().unwrap(),
-                        Ord::Greater => {
-                            root.set_right(value);
-                            self.height = self.height.max(level);
-                            self.count += 1;
-                            return;
-                        }
-                    },
-                    (Some(_), Some(_)) => match value.partial_cmp(root.value()).unwrap() {
-                        Ord::Equal => return,
-                        Ord::Less => root = root.left_mut().unwrap(),
-                        Ord::Greater => root = root.right_mut().unwrap(),
-                    },
-                }
-
-                level += 1;
-            }
-        } else {
-            // This ensures that root is not an imcomparable value.
-            _ = value.partial_cmp(&value).unwrap();
-
-            self.root = Some(Box::new(Node::new(value)));
-            self.count = 1;
-            self.height = 1;
         }
     }
 
@@ -294,6 +217,88 @@ impl<T: PartialOrd> BinaryTree<T> {
             None
         }
     }
+}
+
+/// The methods in this implementation block require trait bounds to correctly apply the logic of the methods.
+///
+/// The trait bound in question is [`PartialOrd`], which is used to compare elements in the tree.
+impl<T> BinaryTree<T>
+where
+    T: PartialOrd,
+{
+    /// Inserts the provided value into the `BinaryTree`,
+    /// and preserves the properties of the binary tree.
+    ///
+    /// # Panics
+    /// The function will panic if a comparison of elements is impossible with the [`PartialOrd`] trait.
+    ///
+    /// # Examples
+    /// ```
+    /// # use ds_rs::binary_tree::BinaryTree;
+    /// let mut tree = BinaryTree::new();
+    /// tree.insert(5);
+    /// assert_eq!(tree.root(), Some(&5));
+    /// assert_eq!(tree.height(), 1);
+    /// assert_eq!(tree.count(), 1);
+    /// ```
+    pub fn insert(&mut self, value: T) {
+        use std::cmp::Ordering as Ord;
+
+        if let Some(mut root) = self.root.as_deref_mut() {
+            // An empty tree is height 0, while a tree with only a root is height 1
+            // meaning this arm, which is entered when root is not empty
+            // automatically starts at level 2 in terms of height.
+            let mut level: usize = 2;
+            loop {
+                match (root.left(), root.right()) {
+                    (None, None) => {
+                        match value.partial_cmp(root.value()).unwrap() {
+                            Ord::Equal => return,
+                            Ord::Less => root.set_left(value),
+                            Ord::Greater => root.set_right(value),
+                        }
+                        self.height = self.height.max(level);
+                        self.count += 1;
+                        return;
+                    }
+                    (None, Some(_)) => match value.partial_cmp(root.value()).unwrap() {
+                        Ord::Equal => return,
+                        Ord::Less => {
+                            root.set_left(value);
+                            self.height = self.height.max(level);
+                            self.count += 1;
+                            return;
+                        }
+                        Ord::Greater => root = root.right_mut().unwrap(),
+                    },
+                    (Some(_), None) => match value.partial_cmp(root.value()).unwrap() {
+                        Ord::Equal => return,
+                        Ord::Less => root = root.left_mut().unwrap(),
+                        Ord::Greater => {
+                            root.set_right(value);
+                            self.height = self.height.max(level);
+                            self.count += 1;
+                            return;
+                        }
+                    },
+                    (Some(_), Some(_)) => match value.partial_cmp(root.value()).unwrap() {
+                        Ord::Equal => return,
+                        Ord::Less => root = root.left_mut().unwrap(),
+                        Ord::Greater => root = root.right_mut().unwrap(),
+                    },
+                }
+
+                level += 1;
+            }
+        } else {
+            // This ensures that root is not an imcomparable value.
+            _ = value.partial_cmp(&value).unwrap();
+
+            self.root = Some(Box::new(Node::new(value)));
+            self.count = 1;
+            self.height = 1;
+        }
+    }
 
     /// Returns `true` if the `BinaryTree` contains an element with the given value.
     ///
@@ -360,7 +365,7 @@ impl<T: PartialOrd> From<Vec<T>> for BinaryTree<T> {
     }
 }
 
-impl<T: PartialOrd> AsRef<BinaryTree<T>> for BinaryTree<T> {
+impl<T> AsRef<BinaryTree<T>> for BinaryTree<T> {
     /// Returns an immutable reference to the `BinaryTree`.
     #[inline]
     fn as_ref(&self) -> &BinaryTree<T> {
@@ -368,7 +373,7 @@ impl<T: PartialOrd> AsRef<BinaryTree<T>> for BinaryTree<T> {
     }
 }
 
-impl<T: PartialOrd> AsMut<BinaryTree<T>> for BinaryTree<T> {
+impl<T> AsMut<BinaryTree<T>> for BinaryTree<T> {
     /// Returns a mutable reference to the `BinaryTree`.
     #[inline]
     fn as_mut(&mut self) -> &mut BinaryTree<T> {
@@ -398,7 +403,7 @@ impl<T: PartialOrd> Extend<T> for BinaryTree<T> {
     }
 }
 
-impl<T: PartialOrd> IntoIterator for BinaryTree<T> {
+impl<T> IntoIterator for BinaryTree<T> {
     type Item = T;
 
     type IntoIter = IntoIter<T>;
@@ -463,7 +468,7 @@ impl<T> Iterator for IntoIter<T> {
     }
 }
 
-impl<'a, T: PartialOrd> IntoIterator for &'a BinaryTree<T> {
+impl<'a, T> IntoIterator for &'a BinaryTree<T> {
     type Item = &'a T;
 
     type IntoIter = Iter<'a, T>;
@@ -527,7 +532,7 @@ struct Node<T> {
     right: Option<Box<Node<T>>>,
 }
 
-impl<T: PartialOrd> Node<T> {
+impl<T> Node<T> {
     /// Constructs a new empty `Node<T>`.
     ///
     /// An node has no left or right child.

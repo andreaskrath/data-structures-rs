@@ -221,16 +221,13 @@ impl<T> BinaryTree<T> {
 
 /// The methods in this implementation block require trait bounds to correctly apply the logic of the methods.
 ///
-/// The trait bound in question is [`PartialOrd`], which is used to compare elements in the tree.
+/// The trait bound in question is [`Ord`], which is used to compare elements in the tree.
 impl<T> BinaryTree<T>
 where
     T: Ord,
 {
     /// Inserts the provided value into the `BinaryTree`,
     /// and preserves the properties of the binary tree.
-    ///
-    /// # Panics
-    /// The function will panic if a comparison of elements is impossible with the [`PartialOrd`] trait.
     ///
     /// # Examples
     /// ```
@@ -291,7 +288,6 @@ where
                 level += 1;
             }
         } else {
-
             self.root = Some(Box::new(Node::new(value)));
             self.count = 1;
             self.height = 1;
@@ -299,9 +295,6 @@ where
     }
 
     /// Returns `true` if the `BinaryTree` contains an element with the given value.
-    ///
-    /// # Panics
-    /// The function will panic if a comparison of elements is impossible with the [`PartialOrd`] trait.
     ///
     /// # Time Complexity
     ///
@@ -350,9 +343,6 @@ where
 
 impl<T: Ord> From<Vec<T>> for BinaryTree<T> {
     /// Creates a `BinaryTree<T>` from `Vec<T>`.
-    ///
-    /// # Panic
-    /// The function will panic if a comparison of elements is impossible with the [`PartialOrd`] trait.
     fn from(vec: Vec<T>) -> Self {
         let mut tree = BinaryTree::new();
         for v in vec {

@@ -68,7 +68,7 @@ impl<T> BinaryTree<T> {
         self.height = 0;
     }
 
-    /// Returns the height of the binary tree.
+    /// Traverses and returns the height of the binary tree.
     ///
     /// An empty tree has a height of `0`.
     ///
@@ -93,7 +93,26 @@ impl<T> BinaryTree<T> {
     /// ```
     #[inline]
     pub fn height(&self) -> usize {
-        self.height
+        let mut height = 0;
+        let mut queue = Vec::new();
+
+        if let Some(root) = self.root.as_deref() {
+            queue.push((1, root));
+        }
+
+        while let Some((node_height, node)) = queue.pop() {
+            height = height.max(node_height);
+
+            if let Some(left) = node.left.as_deref() {
+                queue.push((node_height + 1, left));
+            }
+
+            if let Some(right) = node.right.as_deref() {
+                queue.push((node_height + 1, right))
+            }
+        }
+
+        height
     }
 
     /// Returns the value contained within the root element.
@@ -773,17 +792,6 @@ mod getters {
         };
         let expected = 5;
         assert_eq!(tree.count(), expected);
-    }
-
-    #[test]
-    fn height() {
-        let tree: BinaryTree<()> = BinaryTree {
-            root: None,
-            count: 0,
-            height: 3,
-        };
-        let expected = 3;
-        assert_eq!(tree.height(), expected);
     }
 
     #[test]

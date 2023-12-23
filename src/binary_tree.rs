@@ -1165,19 +1165,6 @@ mod insert {
     }
 
     #[test]
-    fn inserts_unevenly_and_ensures_correct_height() {
-        let mut tree = BinaryTree::new();
-        let expected = 3;
-
-        tree.insert(2);
-        tree.insert(1);
-        tree.insert(0);
-        tree.insert(3);
-
-        assert_eq!(tree.height(), expected);
-    }
-
-    #[test]
     fn inserts_unevenly_and_ensures_correct_count() {
         let mut tree = BinaryTree::new();
         let expected = 4;

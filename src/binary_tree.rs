@@ -842,6 +842,145 @@ mod getters {
 }
 
 #[cfg(test)]
+mod height {
+    use super::{BinaryTree, Node};
+
+    #[test]
+    fn empty_tree_is_0() {
+        let tree: BinaryTree<()> = BinaryTree {
+            root: None,
+            count: 0,
+        };
+        let expected = 0;
+        assert_eq!(tree.height(), expected);
+    }
+
+    #[test]
+    fn three_element_balanced_tree_is_2() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 2,
+                left: Some(Box::new(Node {
+                    value: 1,
+                    left: None,
+                    right: None,
+                })),
+                right: Some(Box::new(Node {
+                    value: 3,
+                    left: None,
+                    right: None,
+                })),
+            })),
+            count: 3,
+        };
+        let expected = 2;
+        let actual = tree.height();
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn unbalanced_right_tree_is_5() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 1,
+                left: None,
+                right: Some(Box::new(Node {
+                    value: 2,
+                    left: None,
+                    right: Some(Box::new(Node {
+                        value: 3,
+                        left: None,
+                        right: Some(Box::new(Node {
+                            value: 4,
+                            left: None,
+                            right: Some(Box::new(Node {
+                                value: 5,
+                                left: None,
+                                right: None,
+                            })),
+                        })),
+                    })),
+                })),
+            })),
+            count: 5,
+        };
+        let expected = 5;
+        let actual = tree.height();
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn unbalanced_left_tree_is_5() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 5,
+                left: Some(Box::new(Node {
+                    value: 4,
+                    left: Some(Box::new(Node {
+                        value: 3,
+                        left: Some(Box::new(Node {
+                            value: 2,
+                            left: Some(Box::new(Node {
+                                value: 1,
+                                left: None,
+                                right: None,
+                            })),
+                            right: None,
+                        })),
+                        right: None,
+                    })),
+                    right: None,
+                })),
+                right: None,
+            })),
+            count: 5,
+        };
+        let expected = 5;
+        let actual = tree.height();
+        assert_eq!(actual, expected);
+    }
+
+    #[test]
+    fn seven_element_balanced_tree_is_3() {
+        let tree = BinaryTree {
+            root: Some(Box::new(Node {
+                value: 50,
+                left: Some(Box::new(Node {
+                    value: 25,
+                    left: Some(Box::new(Node {
+                        value: 13,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 37,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+                right: Some(Box::new(Node {
+                    value: 75,
+                    left: Some(Box::new(Node {
+                        value: 63,
+                        left: None,
+                        right: None,
+                    })),
+                    right: Some(Box::new(Node {
+                        value: 87,
+                        left: None,
+                        right: None,
+                    })),
+                })),
+            })),
+            count: 7,
+        };
+        let expected = 3;
+        let actual = tree.height();
+        assert_eq!(actual, expected);
+    }
+}
+
+#[cfg(test)]
 mod insert {
     use super::{BinaryTree, Node};
 

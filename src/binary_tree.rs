@@ -8,7 +8,6 @@ use serde::{Deserialize, Serialize};
 pub struct BinaryTree<T> {
     root: Option<Box<Node<T>>>,
     count: usize,
-    height: usize,
 }
 
 impl<T> BinaryTree<T> {
@@ -27,7 +26,6 @@ impl<T> BinaryTree<T> {
         Self {
             root: None,
             count: 0,
-            height: 0,
         }
     }
 
@@ -65,7 +63,6 @@ impl<T> BinaryTree<T> {
     pub fn clear(&mut self) {
         self.root = None;
         self.count = 0;
-        self.height = 0;
     }
 
     /// Traverses and returns the height of the binary tree.
@@ -778,7 +775,6 @@ mod getters {
         let tree: BinaryTree<()> = BinaryTree {
             root: None,
             count: 5,
-            height: 0,
         };
         let expected = 5;
         assert_eq!(tree.count(), expected);
@@ -793,12 +789,10 @@ mod getters {
                 right: None,
             })),
             count: 1,
-            height: 1,
         };
         let empty_tree: BinaryTree<()> = BinaryTree {
             root: None,
             count: 0,
-            height: 0,
         };
 
         assert!(!tree.is_empty());
@@ -814,12 +808,10 @@ mod getters {
                 right: None,
             })),
             count: 1,
-            height: 1,
         };
         let expected: BinaryTree<i32> = BinaryTree {
             root: None,
             count: 0,
-            height: 0,
         };
 
         assert_ne!(tree, expected);
@@ -838,12 +830,10 @@ mod getters {
                 right: None,
             })),
             count: 1,
-            height: 1,
         };
         let empty_tree: BinaryTree<()> = BinaryTree {
             root: None,
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.root(), Some(&5));
@@ -865,7 +855,6 @@ mod insert {
                 right: None,
             })),
             count: 1,
-            height: 1,
         };
         tree.insert(5);
         assert_eq!(tree, expected);
@@ -885,7 +874,6 @@ mod insert {
                 right: None,
             })),
             count: 2,
-            height: 2,
         };
         tree.insert(5);
         tree.insert(4);
@@ -906,7 +894,6 @@ mod insert {
                 })),
             })),
             count: 2,
-            height: 2,
         };
         tree.insert(5);
         tree.insert(6);
@@ -923,7 +910,6 @@ mod insert {
                 right: None,
             })),
             count: 1,
-            height: 1,
         };
         tree.insert(5);
         tree.insert(5);
@@ -948,7 +934,6 @@ mod insert {
                 })),
             })),
             count: 3,
-            height: 3,
         };
         tree.insert(1);
         tree.insert(2);
@@ -974,7 +959,6 @@ mod insert {
                 })),
             })),
             count: 3,
-            height: 3,
         };
         tree.insert(1);
         tree.insert(2);
@@ -1003,7 +987,6 @@ mod insert {
                 right: None,
             })),
             count: 3,
-            height: 3,
         };
         tree.insert(3);
         tree.insert(2);
@@ -1029,7 +1012,6 @@ mod insert {
                 right: None,
             })),
             count: 3,
-            height: 3,
         };
         tree.insert(3);
         tree.insert(2);
@@ -1062,7 +1044,6 @@ mod insert {
                 right: None,
             })),
             count: 4,
-            height: 4,
         };
         tree.insert(10);
         tree.insert(0);
@@ -1093,7 +1074,6 @@ mod insert {
                 })),
             })),
             count: 4,
-            height: 4,
         };
         tree.insert(0);
         tree.insert(10);
@@ -1121,7 +1101,6 @@ mod insert {
                 })),
             })),
             count: 3,
-            height: 2,
         };
 
         // Creating left child first.
@@ -1172,7 +1151,6 @@ mod insert {
                 })),
             })),
             count: 7,
-            height: 3,
         };
 
         tree.insert(50);
@@ -1222,7 +1200,6 @@ mod min {
         let tree: BinaryTree<i32> = BinaryTree {
             root: None,
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.min(), None);
@@ -1237,7 +1214,6 @@ mod min {
                 right: None,
             })),
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.min(), Some(&5));
@@ -1256,7 +1232,6 @@ mod min {
                 })),
             })),
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.min(), Some(&5));
@@ -1275,7 +1250,6 @@ mod min {
                 right: None,
             })),
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.min(), Some(&4));
@@ -1298,7 +1272,6 @@ mod min {
                 })),
             })),
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.min(), Some(&4));
@@ -1325,7 +1298,6 @@ mod min {
                 })),
             })),
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.min(), Some(&5));
@@ -1352,7 +1324,6 @@ mod min {
                 right: None,
             })),
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.min(), Some(&2));
@@ -1391,7 +1362,6 @@ mod min {
                 })),
             })),
             count: 7,
-            height: 3,
         };
 
         assert_eq!(tree.min(), Some(&13));
@@ -1407,7 +1377,6 @@ mod max {
         let tree: BinaryTree<i32> = BinaryTree {
             root: None,
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.max(), None);
@@ -1422,7 +1391,6 @@ mod max {
                 right: None,
             })),
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.max(), Some(&5));
@@ -1441,7 +1409,6 @@ mod max {
                 })),
             })),
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.max(), Some(&6));
@@ -1460,7 +1427,6 @@ mod max {
                 right: None,
             })),
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.max(), Some(&5));
@@ -1483,7 +1449,6 @@ mod max {
                 })),
             })),
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.max(), Some(&6));
@@ -1510,7 +1475,6 @@ mod max {
                 })),
             })),
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.max(), Some(&8));
@@ -1537,7 +1501,6 @@ mod max {
                 right: None,
             })),
             count: 0,
-            height: 0,
         };
 
         assert_eq!(tree.max(), Some(&5));
@@ -1576,7 +1539,6 @@ mod max {
                 })),
             })),
             count: 7,
-            height: 3,
         };
 
         assert_eq!(tree.max(), Some(&87));
@@ -1592,7 +1554,6 @@ mod contains {
         let tree: BinaryTree<i32> = BinaryTree {
             root: None,
             count: 0,
-            height: 0,
         };
 
         assert!(!tree.contains(&0));
@@ -1607,7 +1568,6 @@ mod contains {
                 right: None,
             })),
             count: 0,
-            height: 0,
         };
 
         assert!(tree.contains(&0));
@@ -1622,7 +1582,6 @@ mod contains {
                 right: None,
             })),
             count: 0,
-            height: 0,
         };
 
         assert!(!tree.contains(&1));
@@ -1649,7 +1608,6 @@ mod contains {
                 right: None,
             })),
             count: 0,
-            height: 0,
         };
 
         assert!(tree.contains(&2));
@@ -1676,7 +1634,6 @@ mod contains {
                 })),
             })),
             count: 0,
-            height: 0,
         };
 
         assert!(tree.contains(&8));
@@ -1705,7 +1662,6 @@ mod iterator_trait_impls {
                 })),
             })),
             count: 3,
-            height: 2,
         };
 
         let tree = BinaryTree::from(values);
@@ -1729,7 +1685,6 @@ mod iterator_trait_impls {
                 })),
             })),
             count: 3,
-            height: 2,
         };
 
         let mut tree_iter = tree.into_iter();
@@ -1773,7 +1728,6 @@ mod iterator_trait_impls {
                 })),
             })),
             count: 7,
-            height: 3,
         };
 
         let mut iter = tree.into_iter();
@@ -1806,7 +1760,6 @@ mod iterator_trait_impls {
                 })),
             })),
             count: 3,
-            height: 2,
         };
 
         assert_eq!(tree, expected)
@@ -1829,7 +1782,6 @@ mod iterator_trait_impls {
                 })),
             })),
             count: 3,
-            height: 2,
         };
 
         let mut iter = tree.iter();
@@ -1873,7 +1825,6 @@ mod iterator_trait_impls {
                 })),
             })),
             count: 7,
-            height: 3,
         };
 
         let mut iter = tree.iter();
@@ -1905,7 +1856,6 @@ mod iterator_trait_impls {
                 })),
             })),
             count: 3,
-            height: 2,
         };
         let expected = BinaryTree {
             root: Some(Box::new(Node {
@@ -1938,7 +1888,6 @@ mod iterator_trait_impls {
                 })),
             })),
             count: 7,
-            height: 3,
         };
 
         tree.extend([13, 37, 63, 87]);
@@ -1954,7 +1903,7 @@ mod json {
 
     #[fixture]
     fn json_tree() -> &'static str {
-        r#"{"root":{"value":5,"left":{"value":4,"left":null,"right":null},"right":{"value":6,"left":null,"right":null}},"count":3,"height":2}"#
+        r#"{"root":{"value":5,"left":{"value":4,"left":null,"right":null},"right":{"value":6,"left":null,"right":null}},"count":3}"#
     }
 
     #[rstest]
@@ -1976,7 +1925,6 @@ mod json {
                 })),
             })),
             count: 3,
-            height: 2,
         };
 
         assert_eq!(tree, expected);
@@ -1999,7 +1947,6 @@ mod json {
                 })),
             })),
             count: 3,
-            height: 2,
         };
         let actual = serde_json::to_string(&tree).expect("should parse tree into json");
 

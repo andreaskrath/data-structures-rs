@@ -261,10 +261,6 @@ where
         use std::cmp::Ordering as Ord;
 
         if let Some(mut root) = self.root.as_deref_mut() {
-            // An empty tree is height 0, while a tree with only a root is height 1
-            // meaning this arm, which is entered when root is not empty
-            // automatically starts at level 2 in terms of height.
-            let mut level: usize = 2;
             loop {
                 match (root.left(), root.right()) {
                     (None, None) => {
@@ -273,7 +269,6 @@ where
                             Ord::Less => root.set_left(value),
                             Ord::Greater => root.set_right(value),
                         }
-                        self.height = self.height.max(level);
                         self.count += 1;
                         return;
                     }
@@ -281,7 +276,6 @@ where
                         Ord::Equal => return,
                         Ord::Less => {
                             root.set_left(value);
-                            self.height = self.height.max(level);
                             self.count += 1;
                             return;
                         }
@@ -292,7 +286,6 @@ where
                         Ord::Less => root = root.left_mut().unwrap(),
                         Ord::Greater => {
                             root.set_right(value);
-                            self.height = self.height.max(level);
                             self.count += 1;
                             return;
                         }
@@ -303,13 +296,10 @@ where
                         Ord::Greater => root = root.right_mut().unwrap(),
                     },
                 }
-
-                level += 1;
             }
         } else {
             self.root = Some(Box::new(Node::new(value)));
             self.count = 1;
-            self.height = 1;
         }
     }
 
